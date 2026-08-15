@@ -12,7 +12,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const ROOM_PHOTOS = [
   '/photos/harshada-01.jpg',
   '/photos/harshada-02.jpg',
-  '/photos/harshada-02.jpg',
   '/photos/harshada-04.jpg',
   '/photos/couple-01.jpg',
   '/photos/harshada-05.jpg'
