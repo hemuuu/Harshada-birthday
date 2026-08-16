@@ -41,7 +41,6 @@ function getMode() {
 }
 
 function App() {
-
   const [mode, setMode] = useState(getMode());
   const [notes, setNotes] = useState([]);
   const [notesLoading, setNotesLoading] = useState(true);
@@ -66,26 +65,20 @@ function App() {
 
   const [password, setPassword] = useState('');
 
-
   useEffect(() => {
-
     localStorage.setItem(
       'hr_assets',
       JSON.stringify(assets)
     );
-
   }, [assets]);
-
 
   /*
    * SUPABASE / BACKEND
    */
   useEffect(() => {
-
     let mounted = true;
 
     const loadWishes = async () => {
-
       const { data, error } =
         await supabase
           .from('wishes')
@@ -98,26 +91,20 @@ function App() {
           );
 
       if (error) {
-
         console.error(
           'Could not load wishes:',
           error
         );
-
       } else if (mounted) {
-
         setNotes(data || []);
-
       }
 
       if (mounted) {
         setNotesLoading(false);
       }
-
     };
 
     loadWishes();
-
 
     const channel = supabase
       .channel('wishes-room')
@@ -130,9 +117,7 @@ function App() {
           table: 'wishes'
         },
         payload => {
-
           setNotes(current => {
-
             if (
               current.some(
                 n => n.id === payload.new.id
@@ -145,9 +130,7 @@ function App() {
               payload.new,
               ...current
             ];
-
           });
-
         }
       )
 
@@ -159,54 +142,36 @@ function App() {
           table: 'wishes'
         },
         payload => {
-
           setNotes(
             current =>
               current.filter(
                 n => n.id !== payload.old.id
               )
           );
-
         }
       )
 
       .subscribe();
 
-
     return () => {
-
       mounted = false;
-
       supabase.removeChannel(channel);
-
     };
-
   }, []);
 
-
   useEffect(() => {
-
     const fn = () => {
       setMode(getMode());
     };
 
-    addEventListener(
-      'popstate',
-      fn
-    );
+    addEventListener('popstate', fn);
 
     return () => {
-      removeEventListener(
-        'popstate',
-        fn
-      );
+      removeEventListener('popstate', fn);
     };
-
   }, []);
 
-
   const go = m => {
-
     history.pushState(
       {},
       '',
@@ -218,15 +183,12 @@ function App() {
     setCelebrate(false);
 
     window.scrollTo(0, 0);
-
   };
-
 
   /*
    * SUPABASE / BACKEND
    */
   const addNote = async e => {
-
     e.preventDefault();
 
     const cleanName = name.trim();
@@ -239,7 +201,6 @@ function App() {
       return;
     }
 
-
     const { data, error } =
       await supabase
         .from('wishes')
@@ -250,9 +211,7 @@ function App() {
         .select()
         .single();
 
-
     if (error) {
-
       console.error(
         'Could not save wish:',
         error
@@ -263,12 +222,9 @@ function App() {
       );
 
       return;
-
     }
 
-
     setNotes(current => {
-
       if (
         current.some(
           n => n.id === data.id
@@ -281,31 +237,24 @@ function App() {
         data,
         ...current
       ];
-
     });
-
 
     setName('');
     setMessage('');
     setShowAdd(false);
-
   };
-
 
   /*
    * SUPABASE / BACKEND
    */
   const removeNote = async id => {
-
     const { error } =
       await supabase
         .from('wishes')
         .delete()
         .eq('id', id);
 
-
     if (error) {
-
       console.error(
         'Could not delete wish:',
         error
@@ -314,14 +263,10 @@ function App() {
       alert(
         'Could not delete this wish.'
       );
-
     }
-
   };
 
-
   const upload = e => {
-
     const f =
       e.target.files?.[0];
 
@@ -329,13 +274,10 @@ function App() {
       return;
     }
 
-
     const r =
       new FileReader();
 
-
     r.onload = () => {
-
       setAssets([
         {
           id: crypto.randomUUID(),
@@ -344,19 +286,13 @@ function App() {
         },
         ...assets
       ]);
-
     };
 
-
     r.readAsDataURL(f);
-
   };
 
-
   if (mode === 'admin') {
-
     return (
-
       <Admin
         notes={notes}
         removeNote={removeNote}
@@ -365,36 +301,25 @@ function App() {
         unlocked={adminUnlocked}
         password={password}
         setPassword={setPassword}
-
         unlock={() => {
-
           if (
             password === 'iluvharshada'
           ) {
-
             sessionStorage.setItem(
               'hr_admin',
               '1'
             );
 
             setAdminUnlocked(true);
-
           }
-
         }}
-
         go={go}
       />
-
     );
-
   }
 
-
   if (mode === 'harshada') {
-
     return (
-
       <Harshada
         notes={notes}
         assets={assets}
@@ -404,16 +329,11 @@ function App() {
         setCelebrate={setCelebrate}
         notesLoading={notesLoading}
       />
-
     );
-
   }
 
-
   if (mode === 'wish') {
-
     return (
-
       <Wishers
         notes={notes}
         notesLoading={notesLoading}
@@ -425,22 +345,16 @@ function App() {
         message={message}
         setMessage={setMessage}
       />
-
     );
-
   }
 
-
   return (
-
     <Home
       go={go}
       notes={notes}
       notesLoading={notesLoading}
     />
-
   );
-
 }
 
 
@@ -452,50 +366,34 @@ function Shell({
   go,
   showBack = true
 }) {
-
   return (
-
     <main className="page">
 
       <header>
 
         {showBack ? (
-
           <button
             className="back"
             onClick={() => go('home')}
           >
-
             <ArrowLeft size={16} />
-
             back
-
           </button>
-
         ) : (
           <div />
         )}
 
-
         <div className="tiny-title">
-
           HARSHADA'S ROOM
-
-          <span>
-            ♡
-          </span>
-
+          <span>♡</span>
         </div>
 
       </header>
 
-
       {children}
 
     </main>
-
   );
-
 }
 
 
@@ -507,15 +405,12 @@ function Home({
   notes,
   notesLoading
 }) {
-
   return (
-
     <div className="page home">
 
       <div className="stars">
         ✦　✧　⋆
       </div>
-
 
       <div className="hero-copy">
 
@@ -533,52 +428,38 @@ function Home({
 
       </div>
 
-
       <RoomArt
         notes={notes}
         notesLoading={notesLoading}
       />
-
 
       <div className="home-actions">
 
         <button
           onClick={() => go('wish')}
         >
-
           <Plus size={18} />
-
           leave a little wish
-
         </button>
-
 
         <button
           onClick={() => go('harshada')}
         >
-
           <Heart size={17} />
-
           Harshada's door
-
         </button>
 
       </div>
-
 
       <div
         className="secret"
         onClick={() => go('admin')}
       >
-
         admin corner
-
       </div>
 
     </div>
-
   );
-
 }
 
 
@@ -590,9 +471,7 @@ function PhotoPolaroid({
   className,
   label
 }) {
-
   return (
-
     <div
       className={
         `photo-polaroid ${
@@ -600,7 +479,6 @@ function PhotoPolaroid({
         }`
       }
     >
-
       <img
         src={src}
         alt=""
@@ -609,18 +487,13 @@ function PhotoPolaroid({
       <span>
         {label}
       </span>
-
     </div>
-
   );
-
 }
 
 
 /*
  * SHARED ROOM VIEW
- *
- * ALL Supabase notes are displayed.
  */
 function RoomArt({
   notes = [],
@@ -662,13 +535,11 @@ function RoomArt({
       }
     ]);
 
-
   const [bursting, setBursting] =
     useState(null);
 
   const [rabbitFloat, setRabbitFloat] =
     useState(false);
-
 
   useEffect(() => {
 
@@ -681,13 +552,11 @@ function RoomArt({
 
       }, 1200);
 
-
     return () => {
       clearInterval(interval);
     };
 
   }, []);
-
 
   const popBalloon = id => {
 
@@ -695,9 +564,7 @@ function RoomArt({
       return;
     }
 
-
     setBursting(id);
-
 
     setTimeout(() => {
 
@@ -712,24 +579,23 @@ function RoomArt({
       setBursting(null);
 
     }, 450);
-
   };
 
 
   /*
-   * NO LIMIT.
+   * ALL NOTES.
+   * No limit.
    */
   const boardNotes = notes;
 
 
   return (
-
     <>
 
       <style>{`
 
         /*
-         * ONLY HARSHADA MODE
+         * HARSHADA ONLY
          */
         .harshada-room .table {
           display: none !important;
@@ -738,8 +604,6 @@ function RoomArt({
 
         /*
          * TOP ROOM BOARD
-         *
-         * Unlimited dynamic notes.
          */
         .board.dynamic-board {
 
@@ -748,10 +612,7 @@ function RoomArt({
           grid-template-columns:
             repeat(
               auto-fit,
-              minmax(
-                70px,
-                1fr
-              )
+              minmax(70px, 1fr)
             );
 
           gap: 8px;
@@ -772,33 +633,16 @@ function RoomArt({
 
         }
 
-
         .board.dynamic-board
         .board-title {
-
           grid-column: 1 / -1;
-
         }
-
 
         .dynamic-mini-note {
 
           position: relative !important;
 
           inset: auto !important;
-
-          left: auto !important;
-
-          top: auto !important;
-
-          right: auto !important;
-
-          bottom: auto !important;
-
-          transform:
-            rotate(
-              var(--note-rotation)
-            ) !important;
 
           width: auto;
 
@@ -824,8 +668,12 @@ function RoomArt({
 
           line-height: 1.05;
 
-        }
+          transform:
+            rotate(
+              var(--note-rotation)
+            ) !important;
 
+        }
 
         .dynamic-mini-note:hover {
 
@@ -839,36 +687,121 @@ function RoomArt({
 
 
         /*
-         * LOWER HARSHADA NOTE GRID
+         * LOWER HARSHADA SECTION
          *
-         * Unlimited notes.
+         * IMPORTANT:
+         * force the room/board to grow naturally.
+         */
+        .interactive-room {
+
+          height: auto !important;
+
+          min-height: 0 !important;
+
+          overflow: visible !important;
+
+        }
+
+
+        .interactive-room > .wall {
+
+          height: auto !important;
+
+          min-height: 0 !important;
+
+          overflow: visible !important;
+
+          position: relative !important;
+
+          display: flex !important;
+
+          flex-direction: column !important;
+
+        }
+
+
+        /*
+         * Keep the Harshada title visible.
+         */
+        .interactive-room .big-sign {
+
+          position: relative !important;
+
+          z-index: 30 !important;
+
+          flex-shrink: 0 !important;
+
+        }
+
+
+        /*
+         * Keep polaroids above the note grid.
+         *
+         * They remain in their own visual layer
+         * and cannot be covered by notes.
+         */
+        .interactive-room .gallery-strip {
+
+          position: relative !important;
+
+          z-index: 50 !important;
+
+          flex-shrink: 0 !important;
+
+          isolation: isolate;
+
+        }
+
+
+        /*
+         * Dynamic lower note board.
+         *
+         * It is now a normal-flow grid.
+         * Therefore the parent grows with it.
          */
         .harshada-note-grid {
 
-          display: grid;
+          position: relative !important;
+
+          z-index: 10 !important;
+
+          display: grid !important;
 
           grid-template-columns:
             repeat(
               auto-fit,
-              minmax(
-                145px,
-                1fr
-              )
+              minmax(145px, 1fr)
             );
 
           gap: 18px;
 
-          width: 100%;
+          width: 100% !important;
+
+          height: auto !important;
+
+          min-height: 0 !important;
+
+          max-height: none !important;
+
+          overflow: visible !important;
 
           box-sizing: border-box;
 
           padding: 24px;
+
+          margin: 0 !important;
+
+          clear: both;
 
           align-items: start;
 
         }
 
 
+        /*
+         * Every sticky is now part of normal
+         * document flow.
+         */
         .harshada-note-grid
         .sticky.dynamic-sticky {
 
@@ -878,22 +811,21 @@ function RoomArt({
 
           left: auto !important;
 
-          top: auto !important;
-
           right: auto !important;
+
+          top: auto !important;
 
           bottom: auto !important;
 
           width: auto !important;
 
+          min-width: 0 !important;
+
           min-height: 120px;
 
-          margin: 0 !important;
+          height: auto !important;
 
-          transform:
-            rotate(
-              var(--sticky-rotation)
-            ) !important;
+          margin: 0 !important;
 
           box-sizing: border-box;
 
@@ -907,6 +839,15 @@ function RoomArt({
 
           text-align: center;
 
+          overflow: visible !important;
+
+          transform:
+            rotate(
+              var(--sticky-rotation)
+            ) !important;
+
+          z-index: 10;
+
         }
 
 
@@ -917,14 +858,28 @@ function RoomArt({
             rotate(0deg)
             scale(1.04) !important;
 
-          z-index: 20;
+          z-index: 100 !important;
 
         }
 
 
         /*
-         * Mobile
+         * Make sure the lower floor follows
+         * the expanded note board.
          */
+        .interactive-room > .floor {
+
+          height: 160px !important;
+
+          min-height: 160px !important;
+
+          position: relative !important;
+
+          clear: both;
+
+        }
+
+
         @media (max-width: 600px) {
 
           .harshada-note-grid {
@@ -941,7 +896,6 @@ function RoomArt({
 
           }
 
-
           .harshada-note-grid
           .sticky.dynamic-sticky {
 
@@ -952,6 +906,9 @@ function RoomArt({
         }
 
 
+        /*
+         * RABBIT
+         */
         .room-rabbit {
 
           transition:
@@ -975,6 +932,9 @@ function RoomArt({
         }
 
 
+        /*
+         * BALLOONS
+         */
         .room-balloon {
 
           position: absolute;
@@ -1168,7 +1128,6 @@ function RoomArt({
 
         }
 
-
         .balloon-burst span:nth-child(2) {
 
           transform:
@@ -1177,7 +1136,6 @@ function RoomArt({
 
         }
 
-
         .balloon-burst span:nth-child(3) {
 
           transform:
@@ -1185,7 +1143,6 @@ function RoomArt({
             translate(-20px,12px);
 
         }
-
 
         .balloon-burst span:nth-child(4) {
 
@@ -1254,13 +1211,11 @@ function RoomArt({
                   '#a9c8a7'
                 ];
 
-
                 const color =
                   balloonColors[
                     index %
                     balloonColors.length
                   ];
-
 
                 return (
 
@@ -1310,7 +1265,6 @@ function RoomArt({
                           left: balloon.x,
                           top: balloon.y
                         }}
-
                       >
 
                         <span>✦</span>
@@ -1341,7 +1295,7 @@ function RoomArt({
             </div>
 
 
-            {/* DYNAMIC REAL WISH BOARD */}
+            {/* TOP DYNAMIC WISH BOARD */}
 
             <div
               className="board dynamic-board"
@@ -1357,17 +1311,13 @@ function RoomArt({
               {notesLoading ? (
 
                 <span className="mini-note n0">
-
                   loading…
-
                 </span>
 
               ) : boardNotes.length === 0 ? (
 
                 <span className="mini-note n0">
-
                   no wishes yet ♡
-
                 </span>
 
               ) : (
@@ -1383,7 +1333,6 @@ function RoomArt({
                           ) + '…'
                         : note.message;
 
-
                     const rotations = [
                       '-2deg',
                       '2deg',
@@ -1392,7 +1341,6 @@ function RoomArt({
                       '-3deg',
                       '3deg'
                     ];
-
 
                     return (
 
@@ -1490,16 +1438,11 @@ function RoomArt({
               ♧
             </div>
 
-
-            {/* WHITE RABBIT */}
-
             <div
               className="cat room-rabbit"
               aria-label="little white rabbit"
             >
-
               🐇
-
             </div>
 
           </div>
@@ -1509,9 +1452,7 @@ function RoomArt({
       </div>
 
     </>
-
   );
-
 }
 
 
@@ -1538,7 +1479,6 @@ function Wishers({
     ).values()
   ];
 
-
   return (
 
     <Shell
@@ -1548,31 +1488,21 @@ function Wishers({
       <section className="section">
 
         <p className="eyebrow">
-
           YOU'RE IN THE ROOM
-
         </p>
 
-
         <h2>
-
           Leave Harshada
           <br />
-
           <em>
             a little note.
           </em>
-
         </h2>
 
-
         <p className="lead">
-
           No account. No login. Just your name +
           something you want her to know.
-
         </p>
-
 
         <button
           className="primary"
@@ -1580,13 +1510,9 @@ function Wishers({
             setShowAdd(true)
           }
         >
-
           <Plus />
-
           Add my note
-
         </button>
-
 
         <div className="wished">
 
@@ -1602,7 +1528,6 @@ function Wishers({
 
           </div>
 
-
           <button
             onClick={() => {
 
@@ -1616,9 +1541,7 @@ function Wishers({
 
             }}
           >
-
             see who wished →
-
           </button>
 
         </div>
@@ -1640,7 +1563,6 @@ function Wishers({
         <h3>
           Already on the board
         </h3>
-
 
         {notesLoading ? (
 
@@ -1738,9 +1660,7 @@ function Wishers({
               className="primary"
               type="submit"
             >
-
               Pin it to the board ♡
-
             </button>
 
           </form>
@@ -1752,7 +1672,6 @@ function Wishers({
     </Shell>
 
   );
-
 }
 
 
@@ -1770,11 +1689,8 @@ function Harshada({
 }) {
 
   useEffect(() => {
-
     setCelebrate(true);
-
   }, []);
-
 
   const photos =
     assets.length
@@ -1784,11 +1700,6 @@ function Harshada({
       : ROOM_PHOTOS;
 
 
-  /*
-   * Dynamic rotations for lower notes.
-   * These repeat visually, but the notes
-   * themselves NEVER repeat positions.
-   */
   const stickyRotations = [
     '-3deg',
     '2deg',
@@ -1805,7 +1716,6 @@ function Harshada({
       showBack={false}
     >
 
-
       {/* INTRO */}
 
       <section
@@ -1813,31 +1723,21 @@ function Harshada({
       >
 
         <p className="eyebrow">
-
           A ROOM MADE FOR YOU
-
         </p>
 
-
         <h2>
-
           Happy birthday,
           <br />
-
           <em>
             babe.
           </em>
-
         </h2>
 
-
         <p className="lead">
-
           There are little pieces of love hidden
           around this room. Tap a note to read it.
-
         </p>
-
 
         <button
           className="primary"
@@ -1845,23 +1745,14 @@ function Harshada({
             setCelebrate(true)
           }
         >
-
           <Sparkles />
-
           Open all the wishes
-
         </button>
 
       </section>
 
 
-      {/*
-
-        SHARED MAIN ROOM
-
-        Table hidden ONLY in Harshada mode.
-
-      */}
+      {/* MAIN ROOM */}
 
       <RoomArt
         notes={notes}
@@ -1870,13 +1761,7 @@ function Harshada({
       />
 
 
-      {/*
-
-        LOWER HARSHADA ROOM
-
-        UNLIMITED NOTES
-
-      */}
+      {/* LOWER HARSHADA SECTION */}
 
       <div className="interactive-room">
 
@@ -1896,6 +1781,10 @@ function Harshada({
           </div>
 
 
+          {/*
+           * POLAROIDS ARE KEPT OUTSIDE
+           * THE NOTE GRID AND ABOVE IT.
+           */}
           <div className="gallery-strip">
 
             {photos
@@ -1918,38 +1807,36 @@ function Harshada({
 
           {notesLoading ? (
 
-            <p className="sticky s0">
+            <div className="harshada-note-grid">
 
-              Loading wishes…
+              <p className="sticky dynamic-sticky">
 
-            </p>
+                Loading wishes…
+
+              </p>
+
+            </div>
 
           ) : notes.length === 0 ? (
 
-            <p className="sticky s0">
+            <div className="harshada-note-grid">
 
-              No wishes yet ♡
+              <p className="sticky dynamic-sticky">
 
-            </p>
+                No wishes yet ♡
+
+              </p>
+
+            </div>
 
           ) : (
 
             /*
-             * IMPORTANT:
+             * NO LIMIT.
              *
-             * There is NO:
-             *
-             * notes.slice(...)
-             *
-             * and NO:
-             *
-             * i % 10
-             *
-             *
-             * Every note gets its own
-             * grid position.
+             * Every Supabase note gets
+             * its own grid cell.
              */
-
             <div className="harshada-note-grid">
 
               {notes.map(
@@ -1962,7 +1849,6 @@ function Harshada({
                           90
                         ) + '…'
                       : n.message;
-
 
                   return (
 
@@ -1991,11 +1877,8 @@ function Harshada({
                         {preview}
                       </span>
 
-
                       <small>
-
                         — {n.name}
-
                       </small>
 
                     </button>
@@ -2015,9 +1898,7 @@ function Harshada({
         <div className="floor">
 
           <span className="floor-cat">
-
             🐇
-
           </span>
 
         </div>
@@ -2039,9 +1920,7 @@ function Harshada({
         >
 
           <div className="read-note">
-
             {selected.message}
-
           </div>
 
         </Modal>
@@ -2065,7 +1944,6 @@ function Harshada({
     </Shell>
 
   );
-
 }
 
 
@@ -2091,7 +1969,6 @@ function Celebration({
               key={i}
 
               style={{
-
                 left:
                   `${(i * 37) % 100}%`,
 
@@ -2100,7 +1977,6 @@ function Celebration({
 
                 fontSize:
                   `${12 + (i % 4) * 5}px`
-
               }}
             >
 
@@ -2127,11 +2003,9 @@ function Celebration({
           🎂
         </div>
 
-
         <p>
           for the birthday girl
         </p>
-
 
         <h2>
 
@@ -2147,21 +2021,15 @@ function Celebration({
 
         </h2>
 
-
         <span>
-
           {count} little wishes are waiting for you
-
         </span>
-
 
         <button
           className="primary"
           onClick={close}
         >
-
           Let me read them →
-
         </button>
 
       </div>
@@ -2169,7 +2037,6 @@ function Celebration({
     </div>
 
   );
-
 }
 
 
@@ -2200,11 +2067,9 @@ function Admin({
           Harshada's Room · Admin
         </p>
 
-
         <h2>
           Enter the secret key
         </h2>
-
 
         <input
           type="password"
@@ -2222,16 +2087,12 @@ function Admin({
           }
         />
 
-
         <button
           className="primary"
           onClick={unlock}
         >
-
           Unlock
-
         </button>
-
 
         <button
           className="plain"
@@ -2239,15 +2100,12 @@ function Admin({
             go('home')
           }
         >
-
           ← back to room
-
         </button>
 
       </div>
 
     );
-
   }
 
 
@@ -2263,21 +2121,15 @@ function Admin({
         <div>
 
           <p className="eyebrow">
-
             PRIVATE CONTROL ROOM
-
           </p>
 
-
           <h2>
-
             Harshada's Room
             <br />
-
             <em>
               Admin
             </em>
-
           </h2>
 
         </div>
@@ -2288,7 +2140,6 @@ function Admin({
           <Upload size={18} />
 
           Add room photo
-
 
           <input
             type="file"
@@ -2316,9 +2167,7 @@ function Admin({
           <div>
 
             <h3>
-
               Wishes · {notes.length}
-
             </h3>
 
 
@@ -2335,7 +2184,6 @@ function Admin({
                     <b>
                       {n.name}
                     </b>
-
 
                     <p>
                       {n.message}
@@ -2369,9 +2217,7 @@ function Admin({
           <div>
 
             <h3>
-
               Uploaded memories · {assets.length}
-
             </h3>
 
 
@@ -2401,7 +2247,6 @@ function Admin({
     </Shell>
 
   );
-
 }
 
 
@@ -2433,16 +2278,12 @@ function Modal({
           className="close"
           onClick={close}
         >
-
           <X />
-
         </button>
 
 
         <p className="eyebrow">
-
           A LITTLE NOTE
-
         </p>
 
 
@@ -2458,7 +2299,6 @@ function Modal({
     </div>
 
   );
-
 }
 
 
