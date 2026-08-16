@@ -40,15 +40,11 @@ function getMode() {
   );
 }
 
-
 function App() {
 
   const [mode, setMode] = useState(getMode());
-
   const [notes, setNotes] = useState([]);
-
-  const [notesLoading, setNotesLoading] =
-    useState(true);
+  const [notesLoading, setNotesLoading] = useState(true);
 
   const [assets, setAssets] = useState(
     () =>
@@ -57,28 +53,18 @@ function App() {
       )
   );
 
-  const [showAdd, setShowAdd] =
-    useState(false);
-
-  const [selected, setSelected] =
-    useState(null);
-
-  const [celebrate, setCelebrate] =
-    useState(false);
-
-  const [name, setName] =
-    useState('');
-
-  const [message, setMessage] =
-    useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [celebrate, setCelebrate] = useState(false);
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
 
   const [adminUnlocked, setAdminUnlocked] =
     useState(
       sessionStorage.getItem('hr_admin') === '1'
     );
 
-  const [password, setPassword] =
-    useState('');
+  const [password, setPassword] = useState('');
 
 
   useEffect(() => {
@@ -93,7 +79,6 @@ function App() {
 
   /*
    * SUPABASE / BACKEND
-   * DO NOT CHANGE
    */
   useEffect(() => {
 
@@ -126,9 +111,7 @@ function App() {
       }
 
       if (mounted) {
-
         setNotesLoading(false);
-
       }
 
     };
@@ -155,9 +138,7 @@ function App() {
                 n => n.id === payload.new.id
               )
             ) {
-
               return current;
-
             }
 
             return [
@@ -206,9 +187,7 @@ function App() {
   useEffect(() => {
 
     const fn = () => {
-
       setMode(getMode());
-
     };
 
     addEventListener(
@@ -217,12 +196,10 @@ function App() {
     );
 
     return () => {
-
       removeEventListener(
         'popstate',
         fn
       );
-
     };
 
   }, []);
@@ -237,9 +214,7 @@ function App() {
     );
 
     setMode(m);
-
     setSelected(null);
-
     setCelebrate(false);
 
     window.scrollTo(0, 0);
@@ -249,25 +224,19 @@ function App() {
 
   /*
    * SUPABASE / BACKEND
-   * DO NOT CHANGE
    */
   const addNote = async e => {
 
     e.preventDefault();
 
-    const cleanName =
-      name.trim();
-
-    const cleanMessage =
-      message.trim();
+    const cleanName = name.trim();
+    const cleanMessage = message.trim();
 
     if (
       !cleanName ||
       !cleanMessage
     ) {
-
       return;
-
     }
 
 
@@ -305,9 +274,7 @@ function App() {
           n => n.id === data.id
         )
       ) {
-
         return current;
-
       }
 
       return [
@@ -319,9 +286,7 @@ function App() {
 
 
     setName('');
-
     setMessage('');
-
     setShowAdd(false);
 
   };
@@ -329,7 +294,6 @@ function App() {
 
   /*
    * SUPABASE / BACKEND
-   * DO NOT CHANGE
    */
   const removeNote = async id => {
 
@@ -362,9 +326,7 @@ function App() {
       e.target.files?.[0];
 
     if (!f) {
-
       return;
-
     }
 
 
@@ -511,9 +473,7 @@ function Shell({
           </button>
 
         ) : (
-
           <div />
-
         )}
 
 
@@ -553,9 +513,7 @@ function Home({
     <div className="page home">
 
       <div className="stars">
-
         ✦　✧　⋆
-
       </div>
 
 
@@ -662,15 +620,7 @@ function PhotoPolaroid({
 /*
  * SHARED ROOM VIEW
  *
- * IMPORTANT:
- *
- * There is NO fixed number of board notes.
- *
- * Every note returned from Supabase is
- * rendered into the board.
- *
- * The board uses a responsive grid so
- * additional wishes create additional rows.
+ * ALL Supabase notes are displayed.
  */
 function RoomArt({
   notes = [],
@@ -716,14 +666,10 @@ function RoomArt({
   const [bursting, setBursting] =
     useState(null);
 
-
   const [rabbitFloat, setRabbitFloat] =
     useState(false);
 
 
-  /*
-   * RABBIT IDLE LOOP
-   */
   useEffect(() => {
 
     const interval =
@@ -737,25 +683,16 @@ function RoomArt({
 
 
     return () => {
-
       clearInterval(interval);
-
     };
 
   }, []);
 
 
-  /*
-   * BALLOON POP
-   */
   const popBalloon = id => {
 
-    if (
-      bursting !== null
-    ) {
-
+    if (bursting !== null) {
       return;
-
     }
 
 
@@ -780,15 +717,7 @@ function RoomArt({
 
 
   /*
-   * IMPORTANT:
-   *
-   * ALL notes are used.
-   *
-   * Previously this was:
-   *
-   * notes.slice(0,11)
-   *
-   * which limited the board.
+   * NO LIMIT.
    */
   const boardNotes = notes;
 
@@ -800,21 +729,17 @@ function RoomArt({
       <style>{`
 
         /*
-         * HARSHADA ONLY:
-         * hide wooden table.
+         * ONLY HARSHADA MODE
          */
         .harshada-room .table {
-
           display: none !important;
-
         }
 
 
         /*
-         * DYNAMIC BOARD
+         * TOP ROOM BOARD
          *
-         * The board can contain any number
-         * of notes and creates rows automatically.
+         * Unlimited dynamic notes.
          */
         .board.dynamic-board {
 
@@ -914,26 +839,115 @@ function RoomArt({
 
 
         /*
-         * Scrollbar styling for a large
-         * number of wishes.
+         * LOWER HARSHADA NOTE GRID
+         *
+         * Unlimited notes.
          */
-        .board.dynamic-board::-webkit-scrollbar {
+        .harshada-note-grid {
 
-          width: 5px;
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              auto-fit,
+              minmax(
+                145px,
+                1fr
+              )
+            );
+
+          gap: 18px;
+
+          width: 100%;
+
+          box-sizing: border-box;
+
+          padding: 24px;
+
+          align-items: start;
 
         }
 
 
-        .board.dynamic-board::-webkit-scrollbar-thumb {
+        .harshada-note-grid
+        .sticky.dynamic-sticky {
 
-          background: rgba(
-            73,
-            53,
-            46,
-            .35
-          );
+          position: relative !important;
 
-          border-radius: 10px;
+          inset: auto !important;
+
+          left: auto !important;
+
+          top: auto !important;
+
+          right: auto !important;
+
+          bottom: auto !important;
+
+          width: auto !important;
+
+          min-height: 120px;
+
+          margin: 0 !important;
+
+          transform:
+            rotate(
+              var(--sticky-rotation)
+            ) !important;
+
+          box-sizing: border-box;
+
+          display: flex;
+
+          flex-direction: column;
+
+          justify-content: center;
+
+          align-items: center;
+
+          text-align: center;
+
+        }
+
+
+        .harshada-note-grid
+        .sticky.dynamic-sticky:hover {
+
+          transform:
+            rotate(0deg)
+            scale(1.04) !important;
+
+          z-index: 20;
+
+        }
+
+
+        /*
+         * Mobile
+         */
+        @media (max-width: 600px) {
+
+          .harshada-note-grid {
+
+            grid-template-columns:
+              repeat(
+                2,
+                minmax(0, 1fr)
+              );
+
+            gap: 12px;
+
+            padding: 14px;
+
+          }
+
+
+          .harshada-note-grid
+          .sticky.dynamic-sticky {
+
+            min-height: 105px;
+
+          }
 
         }
 
@@ -1074,15 +1088,11 @@ function RoomArt({
 
           0%,
           100% {
-
             margin-top: 0;
-
           }
 
           50% {
-
             margin-top: -7px;
-
           }
 
         }
@@ -1091,27 +1101,18 @@ function RoomArt({
         @keyframes balloonBurst {
 
           0% {
-
             transform: scale(1);
-
             opacity: 1;
-
           }
 
           45% {
-
             transform: scale(1.35);
-
             opacity: 1;
-
           }
 
           100% {
-
             transform: scale(0);
-
             opacity: 0;
-
           }
 
         }
@@ -1198,19 +1199,13 @@ function RoomArt({
         @keyframes burstParticle {
 
           0% {
-
             opacity: 1;
-
             scale: 1;
-
           }
 
           100% {
-
             opacity: 0;
-
             scale: .4;
-
           }
 
         }
@@ -1219,15 +1214,11 @@ function RoomArt({
         @keyframes burstFade {
 
           from {
-
             opacity: 1;
-
           }
 
           to {
-
             opacity: 0;
-
           }
 
         }
@@ -1322,21 +1313,10 @@ function RoomArt({
 
                       >
 
-                        <span>
-                          ✦
-                        </span>
-
-                        <span>
-                          ♡
-                        </span>
-
-                        <span>
-                          ✧
-                        </span>
-
-                        <span>
-                          •
-                        </span>
+                        <span>✦</span>
+                        <span>♡</span>
+                        <span>✧</span>
+                        <span>•</span>
 
                       </div>
 
@@ -1483,7 +1463,6 @@ function RoomArt({
               <div className="tiny-frame">
 
                 H
-
                 <br />
 
                 <span>
@@ -1647,15 +1626,11 @@ function Wishers({
       </section>
 
 
-      {/* ROOM VIEW */}
-
       <RoomArt
         notes={notes}
         notesLoading={notesLoading}
       />
 
-
-      {/* NOTE LIST */}
 
       <div
         id="wisher-list"
@@ -1663,9 +1638,7 @@ function Wishers({
       >
 
         <h3>
-
           Already on the board
-
         </h3>
 
 
@@ -1796,10 +1769,6 @@ function Harshada({
   notesLoading
 }) {
 
-
-  /*
-   * AUTOMATIC BIRTHDAY INTRO
-   */
   useEffect(() => {
 
     setCelebrate(true);
@@ -1815,11 +1784,27 @@ function Harshada({
       : ROOM_PHOTOS;
 
 
+  /*
+   * Dynamic rotations for lower notes.
+   * These repeat visually, but the notes
+   * themselves NEVER repeat positions.
+   */
+  const stickyRotations = [
+    '-3deg',
+    '2deg',
+    '-1deg',
+    '3deg',
+    '-2deg',
+    '1deg'
+  ];
+
+
   return (
 
     <Shell
       showBack={false}
     >
+
 
       {/* INTRO */}
 
@@ -1874,9 +1859,7 @@ function Harshada({
 
         SHARED MAIN ROOM
 
-        ALL WISHES ARE NOW DYNAMIC.
-
-        Wooden table is hidden ONLY here.
+        Table hidden ONLY in Harshada mode.
 
       */}
 
@@ -1889,8 +1872,9 @@ function Harshada({
 
       {/*
 
-        EXISTING LOWER HARSHADA ROOM
-        RETAINED
+        LOWER HARSHADA ROOM
+
+        UNLIMITED NOTES
 
       */}
 
@@ -1940,47 +1924,88 @@ function Harshada({
 
             </p>
 
+          ) : notes.length === 0 ? (
+
+            <p className="sticky s0">
+
+              No wishes yet ♡
+
+            </p>
+
           ) : (
 
-            notes.map(
-              (n, i) => (
+            /*
+             * IMPORTANT:
+             *
+             * There is NO:
+             *
+             * notes.slice(...)
+             *
+             * and NO:
+             *
+             * i % 10
+             *
+             *
+             * Every note gets its own
+             * grid position.
+             */
 
-                <button
-                  className={
-                    'sticky s' +
-                    (i % 10)
-                  }
+            <div className="harshada-note-grid">
 
-                  key={n.id}
+              {notes.map(
+                (n, i) => {
 
-                  onClick={() =>
-                    setSelected(n)
-                  }
-                >
+                  const preview =
+                    n.message.length > 90
+                      ? n.message.slice(
+                          0,
+                          90
+                        ) + '…'
+                      : n.message;
 
-                  {
-                    n.message.slice(
-                      0,
-                      38
-                    )
-                  }
 
-                  {
-                    n.message.length > 38
-                      ? '…'
-                      : ''
-                  }
+                  return (
 
-                  <small>
+                    <button
+                      key={n.id}
 
-                    — {n.name}
+                      className={
+                        'sticky ' +
+                        'dynamic-sticky'
+                      }
 
-                  </small>
+                      style={{
+                        '--sticky-rotation':
+                          stickyRotations[
+                            i %
+                            stickyRotations.length
+                          ]
+                      }}
 
-                </button>
+                      onClick={() =>
+                        setSelected(n)
+                      }
+                    >
 
-              )
-            )
+                      <span>
+                        {preview}
+                      </span>
+
+
+                      <small>
+
+                        — {n.name}
+
+                      </small>
+
+                    </button>
+
+                  );
+
+                }
+              )}
+
+            </div>
 
           )}
 
@@ -2000,7 +2025,7 @@ function Harshada({
       </div>
 
 
-      {/* NOTE MODAL */}
+      {/* NOTE READER */}
 
       {selected && (
 
@@ -2099,16 +2124,12 @@ function Celebration({
       <div className="celebrate-card">
 
         <div className="cake-big">
-
           🎂
-
         </div>
 
 
         <p>
-
           for the birthday girl
-
         </p>
 
 
@@ -2176,16 +2197,12 @@ function Admin({
         <Lock size={28} />
 
         <p>
-
           Harshada's Room · Admin
-
         </p>
 
 
         <h2>
-
           Enter the secret key
-
         </h2>
 
 
@@ -2430,9 +2447,7 @@ function Modal({
 
 
         <h3>
-
           {title}
-
         </h3>
 
 
