@@ -37,7 +37,6 @@ function getMode(){
   return new URLSearchParams(location.search).get('mode') || 'home';
 }
 
-
 function App(){
 
   const [mode,setMode] = useState(getMode());
@@ -655,18 +654,13 @@ function PhotoPolaroid({
 /*
  * SHARED ROOM VIEW
  *
- * Used on:
- *
- * HOME
- * WISHERS
- * HARSHADA
- *
- * Real Supabase wishes appear
- * on the board.
+ * hideTable=true is used ONLY
+ * by Harshada mode.
  */
 function RoomArt({
   notes=[],
-  notesLoading=false
+  notesLoading=false,
+  hideTable=false
 }){
 
   const [balloons,setBalloons] =
@@ -779,6 +773,23 @@ function RoomArt({
     <>
 
       <style>{`
+
+        /*
+         * ONLY HARSHADA MODE
+         *
+         * The main/shared room normally
+         * keeps its table.
+         *
+         * When hideTable=true, the table
+         * is hidden only in this room.
+         */
+
+        .harshada-room .table {
+
+          display:none !important;
+
+        }
+
 
         .room-rabbit {
 
@@ -957,6 +968,7 @@ function RoomArt({
         .balloon-burst {
 
           position:absolute;
+
           width:42px;
           height:42px;
 
@@ -1051,11 +1063,15 @@ function RoomArt({
         @keyframes burstFade {
 
           from {
+
             opacity:1;
+
           }
 
           to {
+
             opacity:0;
+
           }
 
         }
@@ -1063,7 +1079,15 @@ function RoomArt({
       `}</style>
 
 
-      <div className="room-frame">
+      <div
+        className={
+          `room-frame ${
+            hideTable
+              ? 'harshada-room'
+              : ''
+          }`
+        }
+      >
 
         <div className="room">
 
@@ -1142,10 +1166,21 @@ function RoomArt({
 
                       >
 
-                        <span>✦</span>
-                        <span>♡</span>
-                        <span>✧</span>
-                        <span>•</span>
+                        <span>
+                          ✦
+                        </span>
+
+                        <span>
+                          ♡
+                        </span>
+
+                        <span>
+                          ✧
+                        </span>
+
+                        <span>
+                          •
+                        </span>
 
                       </div>
 
@@ -1301,7 +1336,9 @@ function RoomArt({
             <div className="chair c2"/>
 
             <div className="plant">
+
               ♧
+
             </div>
 
 
@@ -1364,7 +1401,9 @@ function Wishers({
       <section className="section">
 
         <p className="eyebrow">
+
           YOU'RE IN THE ROOM
+
         </p>
 
 
@@ -1455,20 +1494,26 @@ function Wishers({
       >
 
         <h3>
+
           Already on the board
+
         </h3>
 
 
         {notesLoading ? (
 
           <p>
+
             Loading wishes…
+
           </p>
 
         ) : notes.length === 0 ? (
 
           <p>
+
             No wishes yet — be the first ♡
+
           </p>
 
         ) : (
@@ -1484,11 +1529,15 @@ function Wishers({
                 <span className="tape"/>
 
                 <b>
+
                   {n.name}
+
                 </b>
 
                 <p>
+
                   {n.message}
+
                 </p>
 
               </div>
@@ -1577,13 +1626,6 @@ function Wishers({
 
 /*
  * HARSHADA MODE
- *
- * Structure:
- *
- * 1. Automatic birthday overlay
- * 2. Shared main room view
- * 3. Existing lower interactive room
- * 4. Existing note modal
  */
 function Harshada({
   notes,
@@ -1598,8 +1640,6 @@ function Harshada({
 
   /*
    * AUTOMATIC BIRTHDAY INTRO
-   *
-   * Runs every time Harshada mode mounts.
    */
   useEffect(()=>{
 
@@ -1623,9 +1663,7 @@ function Harshada({
     >
 
 
-      {/* ==========================
-          HARSHADA INTRO
-          ========================== */}
+      {/* HARSHADA INTRO */}
 
       <section
         className="section harshada"
@@ -1673,21 +1711,28 @@ function Harshada({
       </section>
 
 
-      {/* ==========================
-          SHARED MAIN ROOM
-          SAME AS HOME / WISHERS
-          ========================== */}
+      {/*
+
+        SHARED MAIN ROOM
+
+        The only difference from the normal
+        shared room is hideTable=true.
+
+      */}
 
       <RoomArt
         notes={notes}
         notesLoading={notesLoading}
+        hideTable={true}
       />
 
 
-      {/* ==========================
-          EXISTING HARSHADA ROOM
-          RESTORED
-          ========================== */}
+      {/*
+
+        EXISTING LOWER HARSHADA ROOM
+        RESTORED AND UNCHANGED
+
+      */}
 
       <div className="interactive-room">
 
@@ -1800,9 +1845,7 @@ function Harshada({
       </div>
 
 
-      {/* ==========================
-          NOTE READER
-          ========================== */}
+      {/* NOTE READER */}
 
       {selected && (
 
@@ -1827,9 +1870,7 @@ function Harshada({
       )}
 
 
-      {/* ==========================
-          AUTOMATIC BIRTHDAY OVERLAY
-          ========================== */}
+      {/* AUTOMATIC BIRTHDAY OVERLAY */}
 
       {celebrate && (
 
@@ -2216,49 +2257,4 @@ function Modal({
       <div
         className="modal"
 
-        onClick={
-          e =>
-            e.stopPropagation()
-        }
-      >
-
-        <button
-          className="close"
-          onClick={close}
-        >
-
-          <X/>
-
-        </button>
-
-
-        <p className="eyebrow">
-
-          A LITTLE NOTE
-
-        </p>
-
-
-        <h3>
-
-          {title}
-
-        </h3>
-
-
-        {children}
-
-      </div>
-
-    </div>
-
-  );
-
-}
-
-
-createRoot(
-  document.getElementById('root')
-).render(
-  <App/>
-);
+        on
