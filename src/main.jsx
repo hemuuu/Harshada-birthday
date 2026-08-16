@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Heart,
   Lock,
@@ -10,8 +10,8 @@ import {
   ArrowLeft,
   Camera
 } from 'lucide-react';
-import {createRoot} from 'react-dom/client';
-import {createClient} from '@supabase/supabase-js';
+import { createRoot } from 'react-dom/client';
+import { createClient } from '@supabase/supabase-js';
 import './styles.css';
 
 const SUPABASE_URL =
@@ -33,93 +33,99 @@ const ROOM_PHOTOS = [
   '/photos/harshada-05.jpg'
 ];
 
-function getMode(){
-  return new URLSearchParams(location.search).get('mode') || 'home';
+function getMode() {
+  return (
+    new URLSearchParams(location.search).get('mode') ||
+    'home'
+  );
 }
 
-function App(){
 
-  const [mode,setMode] = useState(getMode());
+function App() {
 
-  const [notes,setNotes] = useState([]);
+  const [mode, setMode] = useState(getMode());
 
-  const [notesLoading,setNotesLoading] =
+  const [notes, setNotes] = useState([]);
+
+  const [notesLoading, setNotesLoading] =
     useState(true);
 
-  const [assets,setAssets] = useState(
-    () => JSON.parse(
-      localStorage.getItem('hr_assets') || '[]'
-    )
+  const [assets, setAssets] = useState(
+    () =>
+      JSON.parse(
+        localStorage.getItem('hr_assets') || '[]'
+      )
   );
 
-  const [showAdd,setShowAdd] =
+  const [showAdd, setShowAdd] =
     useState(false);
 
-  const [selected,setSelected] =
+  const [selected, setSelected] =
     useState(null);
 
-  const [celebrate,setCelebrate] =
+  const [celebrate, setCelebrate] =
     useState(false);
 
-  const [name,setName] =
+  const [name, setName] =
     useState('');
 
-  const [message,setMessage] =
+  const [message, setMessage] =
     useState('');
 
-  const [adminUnlocked,setAdminUnlocked] =
+  const [adminUnlocked, setAdminUnlocked] =
     useState(
       sessionStorage.getItem('hr_admin') === '1'
     );
 
-  const [password,setPassword] =
+  const [password, setPassword] =
     useState('');
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
     localStorage.setItem(
       'hr_assets',
       JSON.stringify(assets)
     );
 
-  },[assets]);
+  }, [assets]);
 
 
   /*
    * SUPABASE / BACKEND
    * DO NOT CHANGE
    */
-  useEffect(()=>{
+  useEffect(() => {
 
     let mounted = true;
 
     const loadWishes = async () => {
 
-      const {data,error} = await supabase
-        .from('wishes')
-        .select(
-          'id, name, message, created_at'
-        )
-        .order(
-          'created_at',
-          {ascending:false}
-        );
+      const { data, error } =
+        await supabase
+          .from('wishes')
+          .select(
+            'id, name, message, created_at'
+          )
+          .order(
+            'created_at',
+            { ascending: false }
+          );
 
-      if(error){
+      if (error) {
 
         console.error(
           'Could not load wishes:',
           error
         );
 
-      }else if(mounted){
+      } else if (mounted) {
 
         setNotes(data || []);
 
       }
 
-      if(mounted){
+      if (mounted) {
 
         setNotesLoading(false);
 
@@ -136,19 +142,19 @@ function App(){
       .on(
         'postgres_changes',
         {
-          event:'INSERT',
-          schema:'public',
-          table:'wishes'
+          event: 'INSERT',
+          schema: 'public',
+          table: 'wishes'
         },
         payload => {
 
           setNotes(current => {
 
-            if(
+            if (
               current.some(
                 n => n.id === payload.new.id
               )
-            ){
+            ) {
 
               return current;
 
@@ -167,9 +173,9 @@ function App(){
       .on(
         'postgres_changes',
         {
-          event:'DELETE',
-          schema:'public',
-          table:'wishes'
+          event: 'DELETE',
+          schema: 'public',
+          table: 'wishes'
         },
         payload => {
 
@@ -194,10 +200,10 @@ function App(){
 
     };
 
-  },[]);
+  }, []);
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
     const fn = () => {
 
@@ -219,7 +225,7 @@ function App(){
 
     };
 
-  },[]);
+  }, []);
 
 
   const go = m => {
@@ -236,7 +242,7 @@ function App(){
 
     setCelebrate(false);
 
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
 
   };
 
@@ -255,28 +261,28 @@ function App(){
     const cleanMessage =
       message.trim();
 
-    if(
+    if (
       !cleanName ||
       !cleanMessage
-    ){
+    ) {
 
       return;
 
     }
 
 
-    const {data,error} =
+    const { data, error } =
       await supabase
         .from('wishes')
         .insert({
-          name:cleanName,
-          message:cleanMessage
+          name: cleanName,
+          message: cleanMessage
         })
         .select()
         .single();
 
 
-    if(error){
+    if (error) {
 
       console.error(
         'Could not save wish:',
@@ -294,11 +300,11 @@ function App(){
 
     setNotes(current => {
 
-      if(
+      if (
         current.some(
           n => n.id === data.id
         )
-      ){
+      ) {
 
         return current;
 
@@ -327,14 +333,14 @@ function App(){
    */
   const removeNote = async id => {
 
-    const {error} =
+    const { error } =
       await supabase
         .from('wishes')
         .delete()
-        .eq('id',id);
+        .eq('id', id);
 
 
-    if(error){
+    if (error) {
 
       console.error(
         'Could not delete wish:',
@@ -355,7 +361,7 @@ function App(){
     const f =
       e.target.files?.[0];
 
-    if(!f){
+    if (!f) {
 
       return;
 
@@ -370,9 +376,9 @@ function App(){
 
       setAssets([
         {
-          id:crypto.randomUUID(),
-          url:r.result,
-          caption:f.name
+          id: crypto.randomUUID(),
+          url: r.result,
+          caption: f.name
         },
         ...assets
       ]);
@@ -385,7 +391,7 @@ function App(){
   };
 
 
-  if(mode === 'admin'){
+  if (mode === 'admin') {
 
     return (
 
@@ -398,11 +404,11 @@ function App(){
         password={password}
         setPassword={setPassword}
 
-        unlock={()=>{
+        unlock={() => {
 
-          if(
+          if (
             password === 'iluvharshada'
-          ){
+          ) {
 
             sessionStorage.setItem(
               'hr_admin',
@@ -423,7 +429,7 @@ function App(){
   }
 
 
-  if(mode === 'harshada'){
+  if (mode === 'harshada') {
 
     return (
 
@@ -442,7 +448,7 @@ function App(){
   }
 
 
-  if(mode === 'wish'){
+  if (mode === 'wish') {
 
     return (
 
@@ -482,8 +488,8 @@ function App(){
 function Shell({
   children,
   go,
-  showBack=true
-}){
+  showBack = true
+}) {
 
   return (
 
@@ -495,10 +501,10 @@ function Shell({
 
           <button
             className="back"
-            onClick={()=>go('home')}
+            onClick={() => go('home')}
           >
 
-            <ArrowLeft size={16}/>
+            <ArrowLeft size={16} />
 
             back
 
@@ -540,7 +546,7 @@ function Home({
   go,
   notes,
   notesLoading
-}){
+}) {
 
   return (
 
@@ -579,10 +585,10 @@ function Home({
       <div className="home-actions">
 
         <button
-          onClick={()=>go('wish')}
+          onClick={() => go('wish')}
         >
 
-          <Plus size={18}/>
+          <Plus size={18} />
 
           leave a little wish
 
@@ -590,10 +596,10 @@ function Home({
 
 
         <button
-          onClick={()=>go('harshada')}
+          onClick={() => go('harshada')}
         >
 
-          <Heart size={17}/>
+          <Heart size={17} />
 
           Harshada's door
 
@@ -604,7 +610,7 @@ function Home({
 
       <div
         className="secret"
-        onClick={()=>go('admin')}
+        onClick={() => go('admin')}
       >
 
         admin corner
@@ -625,13 +631,15 @@ function PhotoPolaroid({
   src,
   className,
   label
-}){
+}) {
 
   return (
 
     <div
       className={
-        `photo-polaroid ${className || ''}`
+        `photo-polaroid ${
+          className || ''
+        }`
       }
     >
 
@@ -654,71 +662,78 @@ function PhotoPolaroid({
 /*
  * SHARED ROOM VIEW
  *
- * hideTable=true is used ONLY
- * by Harshada mode.
+ * IMPORTANT:
+ *
+ * There is NO fixed number of board notes.
+ *
+ * Every note returned from Supabase is
+ * rendered into the board.
+ *
+ * The board uses a responsive grid so
+ * additional wishes create additional rows.
  */
 function RoomArt({
-  notes=[],
-  notesLoading=false,
-  hideTable=false
-}){
+  notes = [],
+  notesLoading = false,
+  hideTable = false
+}) {
 
-  const [balloons,setBalloons] =
+  const [balloons, setBalloons] =
     useState([
       {
-        id:1,
-        x:'8%',
-        y:'12%',
-        rotate:'-8deg'
+        id: 1,
+        x: '8%',
+        y: '12%',
+        rotate: '-8deg'
       },
       {
-        id:2,
-        x:'20%',
-        y:'5%',
-        rotate:'6deg'
+        id: 2,
+        x: '20%',
+        y: '5%',
+        rotate: '6deg'
       },
       {
-        id:3,
-        x:'77%',
-        y:'8%',
-        rotate:'-5deg'
+        id: 3,
+        x: '77%',
+        y: '8%',
+        rotate: '-5deg'
       },
       {
-        id:4,
-        x:'87%',
-        y:'19%',
-        rotate:'8deg'
+        id: 4,
+        x: '87%',
+        y: '19%',
+        rotate: '8deg'
       },
       {
-        id:5,
-        x:'91%',
-        y:'42%',
-        rotate:'-6deg'
+        id: 5,
+        x: '91%',
+        y: '42%',
+        rotate: '-6deg'
       }
     ]);
 
 
-  const [bursting,setBursting] =
+  const [bursting, setBursting] =
     useState(null);
 
 
-  const [rabbitFloat,setRabbitFloat] =
+  const [rabbitFloat, setRabbitFloat] =
     useState(false);
 
 
   /*
    * RABBIT IDLE LOOP
    */
-  useEffect(()=>{
+  useEffect(() => {
 
     const interval =
-      setInterval(()=>{
+      setInterval(() => {
 
         setRabbitFloat(
           current => !current
         );
 
-      },1200);
+      }, 1200);
 
 
     return () => {
@@ -727,7 +742,7 @@ function RoomArt({
 
     };
 
-  },[]);
+  }, []);
 
 
   /*
@@ -735,9 +750,9 @@ function RoomArt({
    */
   const popBalloon = id => {
 
-    if(
+    if (
       bursting !== null
-    ){
+    ) {
 
       return;
 
@@ -747,7 +762,7 @@ function RoomArt({
     setBursting(id);
 
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
       setBalloons(
         current =>
@@ -759,13 +774,23 @@ function RoomArt({
 
       setBursting(null);
 
-    },450);
+    }, 450);
 
   };
 
 
-  const boardNotes =
-    notes.slice(0,11);
+  /*
+   * IMPORTANT:
+   *
+   * ALL notes are used.
+   *
+   * Previously this was:
+   *
+   * notes.slice(0,11)
+   *
+   * which limited the board.
+   */
+  const boardNotes = notes;
 
 
   return (
@@ -775,18 +800,140 @@ function RoomArt({
       <style>{`
 
         /*
-         * ONLY HARSHADA MODE
-         *
-         * The main/shared room normally
-         * keeps its table.
-         *
-         * When hideTable=true, the table
-         * is hidden only in this room.
+         * HARSHADA ONLY:
+         * hide wooden table.
          */
-
         .harshada-room .table {
 
-          display:none !important;
+          display: none !important;
+
+        }
+
+
+        /*
+         * DYNAMIC BOARD
+         *
+         * The board can contain any number
+         * of notes and creates rows automatically.
+         */
+        .board.dynamic-board {
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(
+              auto-fit,
+              minmax(
+                70px,
+                1fr
+              )
+            );
+
+          gap: 8px;
+
+          align-items: start;
+
+          align-content: start;
+
+          overflow-y: auto;
+
+          overflow-x: hidden;
+
+          max-height: 420px;
+
+          padding: 10px;
+
+          box-sizing: border-box;
+
+        }
+
+
+        .board.dynamic-board
+        .board-title {
+
+          grid-column: 1 / -1;
+
+        }
+
+
+        .dynamic-mini-note {
+
+          position: relative !important;
+
+          inset: auto !important;
+
+          left: auto !important;
+
+          top: auto !important;
+
+          right: auto !important;
+
+          bottom: auto !important;
+
+          transform:
+            rotate(
+              var(--note-rotation)
+            ) !important;
+
+          width: auto;
+
+          min-width: 0;
+
+          min-height: 38px;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          text-align: center;
+
+          padding: 7px 5px;
+
+          box-sizing: border-box;
+
+          overflow: hidden;
+
+          word-break: break-word;
+
+          line-height: 1.05;
+
+        }
+
+
+        .dynamic-mini-note:hover {
+
+          transform:
+            rotate(0deg)
+            scale(1.06) !important;
+
+          z-index: 20;
+
+        }
+
+
+        /*
+         * Scrollbar styling for a large
+         * number of wishes.
+         */
+        .board.dynamic-board::-webkit-scrollbar {
+
+          width: 5px;
+
+        }
+
+
+        .board.dynamic-board::-webkit-scrollbar-thumb {
+
+          background: rgba(
+            73,
+            53,
+            46,
+            .35
+          );
+
+          border-radius: 10px;
 
         }
 
@@ -816,10 +963,11 @@ function RoomArt({
 
         .room-balloon {
 
-          position:absolute;
+          position: absolute;
 
-          width:34px;
-          height:42px;
+          width: 34px;
+
+          height: 42px;
 
           border-radius:
             50% 50% 47% 47%;
@@ -827,11 +975,11 @@ function RoomArt({
           border:
             2px solid #49352e;
 
-          cursor:pointer;
+          cursor: pointer;
 
-          z-index:8;
+          z-index: 8;
 
-          padding:0;
+          padding: 0;
 
           transition:
             transform .25s ease,
@@ -852,21 +1000,23 @@ function RoomArt({
 
         .room-balloon::before {
 
-          content:'';
+          content: '';
 
-          position:absolute;
+          position: absolute;
 
-          width:7px;
-          height:7px;
+          width: 7px;
 
-          left:50%;
-          bottom:-4px;
+          height: 7px;
+
+          left: 50%;
+
+          bottom: -4px;
 
           transform:
             translateX(-50%)
             rotate(45deg);
 
-          background:inherit;
+          background: inherit;
 
           border-right:
             2px solid #49352e;
@@ -879,19 +1029,21 @@ function RoomArt({
 
         .room-balloon::after {
 
-          content:'';
+          content: '';
 
-          position:absolute;
+          position: absolute;
 
-          width:1px;
-          height:34px;
+          width: 1px;
 
-          left:50%;
-          top:100%;
+          height: 34px;
 
-          background:#49352e;
+          left: 50%;
 
-          opacity:.75;
+          top: 100%;
+
+          background: #49352e;
+
+          opacity: .75;
 
         }
 
@@ -913,7 +1065,7 @@ function RoomArt({
             ease-out
             forwards;
 
-          pointer-events:none;
+          pointer-events: none;
 
         }
 
@@ -923,13 +1075,13 @@ function RoomArt({
           0%,
           100% {
 
-            margin-top:0;
+            margin-top: 0;
 
           }
 
           50% {
 
-            margin-top:-7px;
+            margin-top: -7px;
 
           }
 
@@ -940,25 +1092,25 @@ function RoomArt({
 
           0% {
 
-            transform:scale(1);
+            transform: scale(1);
 
-            opacity:1;
+            opacity: 1;
 
           }
 
           45% {
 
-            transform:scale(1.35);
+            transform: scale(1.35);
 
-            opacity:1;
+            opacity: 1;
 
           }
 
           100% {
 
-            transform:scale(0);
+            transform: scale(0);
 
-            opacity:0;
+            opacity: 0;
 
           }
 
@@ -967,14 +1119,15 @@ function RoomArt({
 
         .balloon-burst {
 
-          position:absolute;
+          position: absolute;
 
-          width:42px;
-          height:42px;
+          width: 42px;
 
-          z-index:9;
+          height: 42px;
 
-          pointer-events:none;
+          z-index: 9;
+
+          pointer-events: none;
 
           animation:
             burstFade
@@ -987,14 +1140,15 @@ function RoomArt({
 
         .balloon-burst span {
 
-          position:absolute;
+          position: absolute;
 
-          left:50%;
-          top:50%;
+          left: 50%;
 
-          font-family:'VT323';
+          top: 50%;
 
-          font-size:16px;
+          font-family: 'VT323';
+
+          font-size: 16px;
 
           animation:
             burstParticle
@@ -1045,15 +1199,17 @@ function RoomArt({
 
           0% {
 
-            opacity:1;
-            scale:1;
+            opacity: 1;
+
+            scale: 1;
 
           }
 
           100% {
 
-            opacity:0;
-            scale:.4;
+            opacity: 0;
+
+            scale: .4;
 
           }
 
@@ -1064,13 +1220,13 @@ function RoomArt({
 
           from {
 
-            opacity:1;
+            opacity: 1;
 
           }
 
           to {
 
-            opacity:0;
+            opacity: 0;
 
           }
 
@@ -1097,16 +1253,14 @@ function RoomArt({
             {/* BALLOONS */}
 
             {balloons.map(
-              (balloon,index)=>{
+              (balloon, index) => {
 
                 const balloonColors = [
-
                   '#f28eae',
                   '#f4d77d',
                   '#9fcbd0',
                   '#d9a3bd',
                   '#a9c8a7'
-
                 ];
 
 
@@ -1129,7 +1283,8 @@ function RoomArt({
                       className={
                         'room-balloon ' +
                         (
-                          bursting === balloon.id
+                          bursting ===
+                          balloon.id
                             ? 'bursting'
                             : ''
                         )
@@ -1144,9 +1299,9 @@ function RoomArt({
                       aria-label="Pop balloon"
 
                       style={{
-                        left:balloon.x,
-                        top:balloon.y,
-                        background:color,
+                        left: balloon.x,
+                        top: balloon.y,
+                        background: color,
                         transform:
                           `rotate(${balloon.rotate})`
                       }}
@@ -1154,14 +1309,15 @@ function RoomArt({
                     />
 
 
-                    {bursting === balloon.id && (
+                    {bursting ===
+                      balloon.id && (
 
                       <div
                         className="balloon-burst"
 
                         style={{
-                          left:balloon.x,
-                          top:balloon.y
+                          left: balloon.x,
+                          top: balloon.y
                         }}
 
                       >
@@ -1198,16 +1354,18 @@ function RoomArt({
 
             <div className="sign">
 
-              HARSHADA'S<br/>
-
+              HARSHADA'S
+              <br />
               ROOM ♡
 
             </div>
 
 
-            {/* REAL WISH BOARD */}
+            {/* DYNAMIC REAL WISH BOARD */}
 
-            <div className="board">
+            <div
+              className="board dynamic-board"
+            >
 
               <div className="board-title">
 
@@ -1218,9 +1376,7 @@ function RoomArt({
 
               {notesLoading ? (
 
-                <span
-                  className="mini-note n0"
-                >
+                <span className="mini-note n0">
 
                   loading…
 
@@ -1228,9 +1384,7 @@ function RoomArt({
 
               ) : boardNotes.length === 0 ? (
 
-                <span
-                  className="mini-note n0"
-                >
+                <span className="mini-note n0">
 
                   no wishes yet ♡
 
@@ -1239,15 +1393,25 @@ function RoomArt({
               ) : (
 
                 boardNotes.map(
-                  (note,index)=>{
+                  (note, index) => {
 
                     const text =
-                      note.message.length > 18
+                      note.message.length > 42
                         ? note.message.slice(
                             0,
-                            18
+                            42
                           ) + '…'
                         : note.message;
+
+
+                    const rotations = [
+                      '-2deg',
+                      '2deg',
+                      '-1deg',
+                      '1deg',
+                      '-3deg',
+                      '3deg'
+                    ];
 
 
                     return (
@@ -1256,9 +1420,17 @@ function RoomArt({
                         key={note.id}
 
                         className={
-                          'mini-note n' +
-                          index
+                          'mini-note ' +
+                          'dynamic-mini-note'
                         }
+
+                        style={{
+                          '--note-rotation':
+                            rotations[
+                              index %
+                              rotations.length
+                            ]
+                        }}
 
                         title={
                           `${note.name}: ${note.message}`
@@ -1312,7 +1484,7 @@ function RoomArt({
 
                 H
 
-                <br/>
+                <br />
 
                 <span>
                   ♡
@@ -1329,16 +1501,14 @@ function RoomArt({
 
           <div className="floor">
 
-            <div className="table"></div>
+            <div className="table" />
 
-            <div className="chair c1"/>
+            <div className="chair c1" />
 
-            <div className="chair c2"/>
+            <div className="chair c2" />
 
             <div className="plant">
-
               ♧
-
             </div>
 
 
@@ -1379,16 +1549,14 @@ function Wishers({
   setName,
   message,
   setMessage
-}){
+}) {
 
   const people = [
-
     ...new Map(
       notes.map(
-        n => [n.name,n]
+        n => [n.name, n]
       )
     ).values()
-
   ];
 
 
@@ -1409,7 +1577,8 @@ function Wishers({
 
         <h2>
 
-          Leave Harshada<br/>
+          Leave Harshada
+          <br />
 
           <em>
             a little note.
@@ -1428,12 +1597,12 @@ function Wishers({
 
         <button
           className="primary"
-          onClick={
-            ()=>setShowAdd(true)
+          onClick={() =>
+            setShowAdd(true)
           }
         >
 
-          <Plus/>
+          <Plus />
 
           Add my note
 
@@ -1456,14 +1625,14 @@ function Wishers({
 
 
           <button
-            onClick={()=>{
+            onClick={() => {
 
               document
                 .getElementById(
                   'wisher-list'
                 )
                 ?.scrollIntoView({
-                  behavior:'smooth'
+                  behavior: 'smooth'
                 });
 
             }}
@@ -1503,17 +1672,13 @@ function Wishers({
         {notesLoading ? (
 
           <p>
-
             Loading wishes…
-
           </p>
 
         ) : notes.length === 0 ? (
 
           <p>
-
             No wishes yet — be the first ♡
-
           </p>
 
         ) : (
@@ -1526,18 +1691,14 @@ function Wishers({
                 key={n.id}
               >
 
-                <span className="tape"/>
+                <span className="tape" />
 
                 <b>
-
                   {n.name}
-
                 </b>
 
                 <p>
-
                   {n.message}
-
                 </p>
 
               </div>
@@ -1554,8 +1715,8 @@ function Wishers({
 
         <Modal
           title="Add your note"
-          close={
-            ()=>setShowAdd(false)
+          close={() =>
+            setShowAdd(false)
           }
         >
 
@@ -1569,11 +1730,10 @@ function Wishers({
 
               <input
                 value={name}
-                onChange={
-                  e =>
-                    setName(
-                      e.target.value
-                    )
+                onChange={e =>
+                  setName(
+                    e.target.value
+                  )
                 }
                 placeholder="e.g. Ananya"
                 maxLength={80}
@@ -1589,11 +1749,10 @@ function Wishers({
 
               <textarea
                 value={message}
-                onChange={
-                  e =>
-                    setMessage(
-                      e.target.value
-                    )
+                onChange={e =>
+                  setMessage(
+                    e.target.value
+                  )
                 }
                 placeholder="Write something lovely…"
                 maxLength={1000}
@@ -1635,17 +1794,17 @@ function Harshada({
   celebrate,
   setCelebrate,
   notesLoading
-}){
+}) {
 
 
   /*
    * AUTOMATIC BIRTHDAY INTRO
    */
-  useEffect(()=>{
+  useEffect(() => {
 
     setCelebrate(true);
 
-  },[]);
+  }, []);
 
 
   const photos =
@@ -1662,8 +1821,7 @@ function Harshada({
       showBack={false}
     >
 
-
-      {/* HARSHADA INTRO */}
+      {/* INTRO */}
 
       <section
         className="section harshada"
@@ -1678,7 +1836,8 @@ function Harshada({
 
         <h2>
 
-          Happy birthday,<br/>
+          Happy birthday,
+          <br />
 
           <em>
             babe.
@@ -1697,12 +1856,12 @@ function Harshada({
 
         <button
           className="primary"
-          onClick={
-            ()=>setCelebrate(true)
+          onClick={() =>
+            setCelebrate(true)
           }
         >
 
-          <Sparkles/>
+          <Sparkles />
 
           Open all the wishes
 
@@ -1715,8 +1874,9 @@ function Harshada({
 
         SHARED MAIN ROOM
 
-        The only difference from the normal
-        shared room is hideTable=true.
+        ALL WISHES ARE NOW DYNAMIC.
+
+        Wooden table is hidden ONLY here.
 
       */}
 
@@ -1730,7 +1890,7 @@ function Harshada({
       {/*
 
         EXISTING LOWER HARSHADA ROOM
-        RESTORED AND UNCHANGED
+        RETAINED
 
       */}
 
@@ -1739,13 +1899,11 @@ function Harshada({
         <div className="wall">
 
 
-          {/* BIG HARSHADA SIGN */}
-
           <div className="big-sign">
 
             HARSHADA
 
-            <br/>
+            <br />
 
             <span>
               ♡
@@ -1754,27 +1912,25 @@ function Harshada({
           </div>
 
 
-          {/* PHOTO GALLERY */}
-
           <div className="gallery-strip">
 
             {photos
-              .slice(0,4)
+              .slice(0, 4)
               .map(
-                (src,i)=>(
+                (src, i) => (
+
                   <img
                     src={src}
                     key={i}
                     alt=""
                   />
+
                 )
               )
             }
 
           </div>
 
-
-          {/* INTERACTIVE WISHES */}
 
           {notesLoading ? (
 
@@ -1787,7 +1943,7 @@ function Harshada({
           ) : (
 
             notes.map(
-              (n,i)=>(
+              (n, i) => (
 
                 <button
                   className={
@@ -1797,8 +1953,8 @@ function Harshada({
 
                   key={n.id}
 
-                  onClick={
-                    ()=>setSelected(n)
+                  onClick={() =>
+                    setSelected(n)
                   }
                 >
 
@@ -1814,7 +1970,6 @@ function Harshada({
                       ? '…'
                       : ''
                   }
-
 
                   <small>
 
@@ -1845,7 +2000,7 @@ function Harshada({
       </div>
 
 
-      {/* NOTE READER */}
+      {/* NOTE MODAL */}
 
       {selected && (
 
@@ -1853,9 +2008,8 @@ function Harshada({
           title={
             `From ${selected.name} ♡`
           }
-
-          close={
-            ()=>setSelected(null)
+          close={() =>
+            setSelected(null)
           }
         >
 
@@ -1870,19 +2024,15 @@ function Harshada({
       )}
 
 
-      {/* AUTOMATIC BIRTHDAY OVERLAY */}
+      {/* BIRTHDAY OVERLAY */}
 
       {celebrate && (
 
         <Celebration
-          close={
-            ()=>setCelebrate(false)
+          close={() =>
+            setCelebrate(false)
           }
-
-          count={
-            notes.length
-          }
-
+          count={notes.length}
         />
 
       )}
@@ -1900,7 +2050,7 @@ function Harshada({
 function Celebration({
   close,
   count
-}){
+}) {
 
   return (
 
@@ -1909,8 +2059,8 @@ function Celebration({
       <div className="confetti">
 
         {Array.from(
-          {length:90},
-          (_,i)=>(
+          { length: 90 },
+          (_, i) => (
 
             <i
               key={i}
@@ -1964,9 +2114,11 @@ function Celebration({
 
         <h2>
 
-          HAPPY<br/>
+          HAPPY
+          <br />
 
-          BIRTHDAY<br/>
+          BIRTHDAY
+          <br />
 
           <em>
             BABE ♡
@@ -2013,16 +2165,15 @@ function Admin({
   setPassword,
   unlock,
   go
-}){
+}) {
 
-  if(!unlocked){
+  if (!unlocked) {
 
     return (
 
       <div className="admin-login">
 
-        <Lock size={28}/>
-
+        <Lock size={28} />
 
         <p>
 
@@ -2041,18 +2192,16 @@ function Admin({
         <input
           type="password"
           value={password}
-          onChange={
-            e =>
-              setPassword(
-                e.target.value
-              )
+          onChange={e =>
+            setPassword(
+              e.target.value
+            )
           }
           placeholder="password"
 
-          onKeyDown={
-            e =>
-              e.key === 'Enter' &&
-              unlock()
+          onKeyDown={e =>
+            e.key === 'Enter' &&
+            unlock()
           }
         />
 
@@ -2069,8 +2218,8 @@ function Admin({
 
         <button
           className="plain"
-          onClick={
-            ()=>go('home')
+          onClick={() =>
+            go('home')
           }
         >
 
@@ -2105,7 +2254,8 @@ function Admin({
 
           <h2>
 
-            Harshada's Room<br/>
+            Harshada's Room
+            <br />
 
             <em>
               Admin
@@ -2118,7 +2268,7 @@ function Admin({
 
         <label className="upload">
 
-          <Upload size={18}/>
+          <Upload size={18} />
 
           Add room photo
 
@@ -2134,7 +2284,7 @@ function Admin({
 
         <p className="admin-tip">
 
-          <Camera size={14}/>
+          <Camera size={14} />
 
           Uploading here adds a photo to Harshada's room.
           The included starter photos are already pinned
@@ -2178,8 +2328,8 @@ function Admin({
 
 
                   <button
-                    onClick={
-                      ()=>removeNote(n.id)
+                    onClick={() =>
+                      removeNote(n.id)
                     }
 
                     aria-label={
@@ -2187,7 +2337,7 @@ function Admin({
                     }
                   >
 
-                    <Trash2 size={16}/>
+                    <Trash2 size={16} />
 
                   </button>
 
@@ -2245,7 +2395,7 @@ function Modal({
   title,
   close,
   children
-}){
+}) {
 
   return (
 
@@ -2257,4 +2407,48 @@ function Modal({
       <div
         className="modal"
 
-        on
+        onClick={e =>
+          e.stopPropagation()
+        }
+      >
+
+        <button
+          className="close"
+          onClick={close}
+        >
+
+          <X />
+
+        </button>
+
+
+        <p className="eyebrow">
+
+          A LITTLE NOTE
+
+        </p>
+
+
+        <h3>
+
+          {title}
+
+        </h3>
+
+
+        {children}
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+createRoot(
+  document.getElementById('root')
+).render(
+  <App />
+);
