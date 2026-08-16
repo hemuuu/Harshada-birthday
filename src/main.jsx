@@ -14,8 +14,11 @@ import {createRoot} from 'react-dom/client';
 import {createClient} from '@supabase/supabase-js';
 import './styles.css';
 
-const SUPABASE_URL = 'https://vxonbwnzdarqmtpdqehr.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_kF5AqXwDU4taNpaUfk-O_Q_1zqPOdh7';
+const SUPABASE_URL =
+  'https://vxonbwnzdarqmtpdqehr.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_kF5AqXwDU4taNpaUfk-O_Q_1zqPOdh7';
 
 const supabase = createClient(
   SUPABASE_URL,
@@ -34,11 +37,15 @@ function getMode(){
   return new URLSearchParams(location.search).get('mode') || 'home';
 }
 
+
 function App(){
 
   const [mode,setMode] = useState(getMode());
+
   const [notes,setNotes] = useState([]);
-  const [notesLoading,setNotesLoading] = useState(true);
+
+  const [notesLoading,setNotesLoading] =
+    useState(true);
 
   const [assets,setAssets] = useState(
     () => JSON.parse(
@@ -46,18 +53,28 @@ function App(){
     )
   );
 
-  const [showAdd,setShowAdd] = useState(false);
-  const [selected,setSelected] = useState(null);
-  const [celebrate,setCelebrate] = useState(false);
+  const [showAdd,setShowAdd] =
+    useState(false);
 
-  const [name,setName] = useState('');
-  const [message,setMessage] = useState('');
+  const [selected,setSelected] =
+    useState(null);
 
-  const [adminUnlocked,setAdminUnlocked] = useState(
-    sessionStorage.getItem('hr_admin') === '1'
-  );
+  const [celebrate,setCelebrate] =
+    useState(false);
 
-  const [password,setPassword] = useState('');
+  const [name,setName] =
+    useState('');
+
+  const [message,setMessage] =
+    useState('');
+
+  const [adminUnlocked,setAdminUnlocked] =
+    useState(
+      sessionStorage.getItem('hr_admin') === '1'
+    );
+
+  const [password,setPassword] =
+    useState('');
 
 
   useEffect(()=>{
@@ -72,7 +89,7 @@ function App(){
 
   /*
    * SUPABASE / BACKEND
-   * Kept unchanged.
+   * DO NOT CHANGE
    */
   useEffect(()=>{
 
@@ -184,7 +201,9 @@ function App(){
   useEffect(()=>{
 
     const fn = () => {
+
       setMode(getMode());
+
     };
 
     addEventListener(
@@ -213,7 +232,9 @@ function App(){
     );
 
     setMode(m);
+
     setSelected(null);
+
     setCelebrate(false);
 
     window.scrollTo(0,0);
@@ -223,14 +244,17 @@ function App(){
 
   /*
    * SUPABASE / BACKEND
-   * Kept unchanged.
+   * DO NOT CHANGE
    */
   const addNote = async e => {
 
     e.preventDefault();
 
-    const cleanName = name.trim();
-    const cleanMessage = message.trim();
+    const cleanName =
+      name.trim();
+
+    const cleanMessage =
+      message.trim();
 
     if(
       !cleanName ||
@@ -242,14 +266,15 @@ function App(){
     }
 
 
-    const {data,error} = await supabase
-      .from('wishes')
-      .insert({
-        name:cleanName,
-        message:cleanMessage
-      })
-      .select()
-      .single();
+    const {data,error} =
+      await supabase
+        .from('wishes')
+        .insert({
+          name:cleanName,
+          message:cleanMessage
+        })
+        .select()
+        .single();
 
 
     if(error){
@@ -289,7 +314,9 @@ function App(){
 
 
     setName('');
+
     setMessage('');
+
     setShowAdd(false);
 
   };
@@ -297,14 +324,15 @@ function App(){
 
   /*
    * SUPABASE / BACKEND
-   * Kept unchanged.
+   * DO NOT CHANGE
    */
   const removeNote = async id => {
 
-    const {error} = await supabase
-      .from('wishes')
-      .delete()
-      .eq('id',id);
+    const {error} =
+      await supabase
+        .from('wishes')
+        .delete()
+        .eq('id',id);
 
 
     if(error){
@@ -325,7 +353,8 @@ function App(){
 
   const upload = e => {
 
-    const f = e.target.files?.[0];
+    const f =
+      e.target.files?.[0];
 
     if(!f){
 
@@ -334,7 +363,8 @@ function App(){
     }
 
 
-    const r = new FileReader();
+    const r =
+      new FileReader();
 
 
     r.onload = () => {
@@ -449,12 +479,6 @@ function App(){
 
 /*
  * SHELL
- *
- * Back button is optional.
- *
- * Admin -> has back
- * Wishers -> no back
- * Harshada -> no back
  */
 function Shell({
   children,
@@ -524,7 +548,9 @@ function Home({
     <div className="page home">
 
       <div className="stars">
+
         ✦　✧　⋆
+
       </div>
 
 
@@ -631,53 +657,55 @@ function PhotoPolaroid({
  *
  * Used on:
  *
- * 1. Home
- * 2. Wishers
- * 3. Harshada
+ * HOME
+ * WISHERS
+ * HARSHADA
  *
- * The notes on the board are REAL
- * Supabase wishes.
+ * Real Supabase wishes appear
+ * on the board.
  */
 function RoomArt({
   notes=[],
   notesLoading=false
 }){
 
-  const [balloons,setBalloons] = useState([
-    {
-      id:1,
-      x:'8%',
-      y:'12%',
-      rotate:'-8deg'
-    },
-    {
-      id:2,
-      x:'20%',
-      y:'5%',
-      rotate:'6deg'
-    },
-    {
-      id:3,
-      x:'77%',
-      y:'8%',
-      rotate:'-5deg'
-    },
-    {
-      id:4,
-      x:'87%',
-      y:'19%',
-      rotate:'8deg'
-    },
-    {
-      id:5,
-      x:'91%',
-      y:'42%',
-      rotate:'-6deg'
-    }
-  ]);
+  const [balloons,setBalloons] =
+    useState([
+      {
+        id:1,
+        x:'8%',
+        y:'12%',
+        rotate:'-8deg'
+      },
+      {
+        id:2,
+        x:'20%',
+        y:'5%',
+        rotate:'6deg'
+      },
+      {
+        id:3,
+        x:'77%',
+        y:'8%',
+        rotate:'-5deg'
+      },
+      {
+        id:4,
+        x:'87%',
+        y:'19%',
+        rotate:'8deg'
+      },
+      {
+        id:5,
+        x:'91%',
+        y:'42%',
+        rotate:'-6deg'
+      }
+    ]);
 
 
-  const [bursting,setBursting] = useState(null);
+  const [bursting,setBursting] =
+    useState(null);
 
 
   const [rabbitFloat,setRabbitFloat] =
@@ -689,13 +717,14 @@ function RoomArt({
    */
   useEffect(()=>{
 
-    const interval = setInterval(()=>{
+    const interval =
+      setInterval(()=>{
 
-      setRabbitFloat(
-        current => !current
-      );
+        setRabbitFloat(
+          current => !current
+        );
 
-    },1200);
+      },1200);
 
 
     return () => {
@@ -751,12 +780,6 @@ function RoomArt({
 
       <style>{`
 
-        /*
-         * ==========================
-         * RABBIT IDLE ANIMATION
-         * ==========================
-         */
-
         .room-rabbit {
 
           transition:
@@ -779,12 +802,6 @@ function RoomArt({
 
         }
 
-
-        /*
-         * ==========================
-         * BALLOONS
-         * ==========================
-         */
 
         .room-balloon {
 
@@ -937,12 +954,6 @@ function RoomArt({
         }
 
 
-        /*
-         * ==========================
-         * BALLOON BURST
-         * ==========================
-         */
-
         .balloon-burst {
 
           position:absolute;
@@ -1064,9 +1075,7 @@ function RoomArt({
           <div className="wall">
 
 
-            {/* ==========================
-                BALLOONS
-                ========================== */}
+            {/* BALLOONS */}
 
             {balloons.map(
               (balloon,index)=>{
@@ -1166,9 +1175,7 @@ function RoomArt({
             )}
 
 
-            {/* ==========================
-                SIGN
-                ========================== */}
+            {/* ROOM SIGN */}
 
             <div className="sign">
 
@@ -1179,9 +1186,7 @@ function RoomArt({
             </div>
 
 
-            {/* ==========================
-                REAL WISH BOARD
-                ========================== */}
+            {/* REAL WISH BOARD */}
 
             <div className="board">
 
@@ -1219,7 +1224,10 @@ function RoomArt({
 
                     const text =
                       note.message.length > 18
-                        ? note.message.slice(0,18) + '…'
+                        ? note.message.slice(
+                            0,
+                            18
+                          ) + '…'
                         : note.message;
 
 
@@ -1252,9 +1260,7 @@ function RoomArt({
             </div>
 
 
-            {/* ==========================
-                PHOTOS
-                ========================== */}
+            {/* PHOTOS */}
 
             <div className="photo-cluster">
 
@@ -1279,9 +1285,7 @@ function RoomArt({
             </div>
 
 
-            {/* ==========================
-                SHELF
-                ========================== */}
+            {/* SHELF */}
 
             <div className="shelf">
 
@@ -1299,13 +1303,10 @@ function RoomArt({
 
             </div>
 
-
           </div>
 
 
-          {/* ==========================
-              FLOOR
-              ========================== */}
+          {/* FLOOR */}
 
           <div className="floor">
 
@@ -1316,9 +1317,7 @@ function RoomArt({
             <div className="chair c2"/>
 
             <div className="plant">
-
               ♧
-
             </div>
 
 
@@ -1326,7 +1325,6 @@ function RoomArt({
 
             <div
               className="cat room-rabbit"
-
               aria-label="little white rabbit"
             >
 
@@ -1335,7 +1333,6 @@ function RoomArt({
             </div>
 
           </div>
-
 
         </div>
 
@@ -1349,17 +1346,7 @@ function RoomArt({
 
 
 /*
- * WISHERS PAGE
- *
- * Structure:
- *
- * Content
- * ↓
- * Number of notes
- * ↓
- * Room view
- * ↓
- * Listing of notes
+ * WISHERS
  */
 function Wishers({
   notes,
@@ -1492,31 +1479,19 @@ function Wishers({
         </h3>
 
 
-        {
-
-          notesLoading
-
-          ?
+        {notesLoading ? (
 
           <p>
-
             Loading wishes…
-
           </p>
 
-          :
-
-          notes.length === 0
-
-          ?
+        ) : notes.length === 0 ? (
 
           <p>
-
             No wishes yet — be the first ♡
-
           </p>
 
-          :
+        ) : (
 
           notes.map(
             n => (
@@ -1528,18 +1503,12 @@ function Wishers({
 
                 <span className="tape"/>
 
-
                 <b>
-
                   {n.name}
-
                 </b>
 
-
                 <p>
-
                   {n.message}
-
                 </p>
 
               </div>
@@ -1547,77 +1516,77 @@ function Wishers({
             )
           )
 
-        }
+        )}
 
       </div>
 
 
-      {
-        showAdd && (
+      {showAdd && (
 
-          <Modal
-            title="Add your note"
-            close={
-              ()=>setShowAdd(false)
-            }
+        <Modal
+          title="Add your note"
+          close={
+            ()=>setShowAdd(false)
+          }
+        >
+
+          <form
+            onSubmit={addNote}
           >
 
-            <form
-              onSubmit={addNote}
+            <label>
+
+              Your name
+
+              <input
+                value={name}
+                onChange={
+                  e =>
+                    setName(
+                      e.target.value
+                    )
+                }
+                placeholder="e.g. Ananya"
+                maxLength={80}
+                autoFocus
+              />
+
+            </label>
+
+
+            <label>
+
+              Your wish
+
+              <textarea
+                value={message}
+                onChange={
+                  e =>
+                    setMessage(
+                      e.target.value
+                    )
+                }
+                placeholder="Write something lovely…"
+                maxLength={1000}
+              />
+
+            </label>
+
+
+            <button
+              className="primary"
+              type="submit"
             >
 
-              <label>
+              Pin it to the board ♡
 
-                Your name
+            </button>
 
-                <input
-                  value={name}
-                  onChange={
-                    e => setName(
-                      e.target.value
-                    )
-                  }
-                  placeholder="e.g. Ananya"
-                  maxLength={80}
-                  autoFocus
-                />
+          </form>
 
-              </label>
+        </Modal>
 
-
-              <label>
-
-                Your wish
-
-                <textarea
-                  value={message}
-                  onChange={
-                    e => setMessage(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Write something lovely…"
-                  maxLength={1000}
-                />
-
-              </label>
-
-
-              <button
-                className="primary"
-                type="submit"
-              >
-
-                Pin it to the board ♡
-
-              </button>
-
-            </form>
-
-          </Modal>
-
-        )
-      }
+      )}
 
     </Shell>
 
@@ -1627,11 +1596,14 @@ function Wishers({
 
 
 /*
- * HARSHADA PAGE
+ * HARSHADA MODE
  *
- * No back button.
+ * IMPORTANT:
  *
- * Shared room view added.
+ * 1. No back button.
+ * 2. Same RoomArt room as Home/Wishers.
+ * 3. Birthday overlay automatically opens
+ *    every time Harshada mode mounts.
  */
 function Harshada({
   notes,
@@ -1642,6 +1614,20 @@ function Harshada({
   setCelebrate,
   notesLoading
 }){
+
+
+  /*
+   * AUTOMATIC BIRTHDAY INTRO
+   *
+   * Every time this page is opened,
+   * show the existing celebration overlay.
+   */
+  useEffect(()=>{
+
+    setCelebrate(true);
+
+  },[]);
+
 
   const photos =
     assets.length
@@ -1703,7 +1689,17 @@ function Harshada({
       </section>
 
 
-      {/* SHARED ROOM VIEW */}
+      {/*
+
+        IMPORTANT:
+
+        Harshada now uses the SAME ROOM VIEW
+        as Home and Wishers.
+
+        The old separate interactive-room
+        has been removed.
+
+      */}
 
       <RoomArt
         notes={notes}
@@ -1711,151 +1707,50 @@ function Harshada({
       />
 
 
-      {/* INTERACTIVE WISH ROOM */}
+      {/* NOTE READER */}
 
-      <div className="interactive-room">
+      {selected && (
 
-        <div className="wall">
-
-
-          <div className="big-sign">
-
-            HARSHADA
-
-            <br/>
-
-            <span>
-              ♡
-            </span>
-
-          </div>
-
-
-          <div className="gallery-strip">
-
-            {photos
-              .slice(0,4)
-              .map(
-                (src,i)=>(
-                  <img
-                    src={src}
-                    key={i}
-                    alt=""
-                  />
-                )
-              )
-            }
-
-          </div>
-
-
-          {
-
-            notesLoading
-
-            ?
-
-            <p className="sticky s0">
-
-              Loading wishes…
-
-            </p>
-
-            :
-
-            notes.map(
-              (n,i)=>(
-                <button
-                  className={
-                    'sticky s' +
-                    (i % 10)
-                  }
-
-                  key={n.id}
-
-                  onClick={
-                    ()=>setSelected(n)
-                  }
-                >
-
-                  {
-                    n.message.slice(
-                      0,
-                      38
-                    )
-                  }
-
-                  {
-                    n.message.length > 38
-                      ? '…'
-                      : ''
-                  }
-
-
-                  <small>
-
-                    — {n.name}
-
-                  </small>
-
-                </button>
-              )
-            )
-
+        <Modal
+          title={
+            `From ${selected.name} ♡`
           }
 
-        </div>
+          close={
+            ()=>setSelected(null)
+          }
+        >
+
+          <div className="read-note">
+
+            {selected.message}
+
+          </div>
+
+        </Modal>
+
+      )}
 
 
-        <div className="floor">
+      {/*
 
-          <span className="floor-cat">
+        AUTOMATIC BIRTHDAY INTRO
 
-            🐇
+        This appears immediately whenever
+        Harshada mode is opened.
 
-          </span>
+      */}
 
-        </div>
+      {celebrate && (
 
-      </div>
+        <Celebration
+          close={
+            ()=>setCelebrate(false)
+          }
+          count={notes.length}
+        />
 
-
-      {
-        selected && (
-
-          <Modal
-            title={
-              `From ${selected.name} ♡`
-            }
-            close={
-              ()=>setSelected(null)
-            }
-          >
-
-            <div className="read-note">
-
-              {selected.message}
-
-            </div>
-
-          </Modal>
-
-        )
-      }
-
-
-      {
-        celebrate && (
-
-          <Celebration
-            close={
-              ()=>setCelebrate(false)
-            }
-            count={notes.length}
-          />
-
-        )
-      }
+      )}
 
     </Shell>
 
@@ -1865,7 +1760,7 @@ function Harshada({
 
 
 /*
- * CELEBRATION
+ * BIRTHDAY CELEBRATION OVERLAY
  */
 function Celebration({
   close,
@@ -1883,6 +1778,7 @@ function Celebration({
           (_,i)=>(
             <i
               key={i}
+
               style={{
                 left:
                   `${(i * 37) % 100}%`,
@@ -1896,9 +1792,12 @@ function Celebration({
             >
 
               {
-                ['✦','♡','✧','•'][
-                  i % 4
-                ]
+                [
+                  '✦',
+                  '♡',
+                  '✧',
+                  '•'
+                ][i % 4]
               }
 
             </i>
@@ -2004,9 +1903,10 @@ function Admin({
           type="password"
           value={password}
           onChange={
-            e => setPassword(
-              e.target.value
-            )
+            e =>
+              setPassword(
+                e.target.value
+              )
           }
           placeholder="password"
 
@@ -2054,7 +1954,6 @@ function Admin({
     >
 
       <div className="admin">
-
 
         <div>
 
@@ -2128,16 +2027,12 @@ function Admin({
                   <div>
 
                     <b>
-
                       {n.name}
-
                     </b>
 
 
                     <p>
-
                       {n.message}
-
                     </p>
 
                   </div>
@@ -2223,10 +2118,10 @@ function Modal({
       <div
         className="modal"
         onClick={
-          e => e.stopPropagation()
+          e =>
+            e.stopPropagation()
         }
       >
-
 
         <button
           className="close"
