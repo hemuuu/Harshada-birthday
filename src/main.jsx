@@ -1,13 +1,26 @@
 import React, {useEffect, useState} from 'react';
+import {
+  Heart,
+  Lock,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+  Sparkles,
+  ArrowLeft,
+  Camera
+} from 'lucide-react';
 import {createRoot} from 'react-dom/client';
-import {Heart, Lock, Plus, Trash2, Upload, X, Sparkles, ArrowLeft, BusFront, Camera} from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import {createClient} from '@supabase/supabase-js';
 import './styles.css';
 
 const SUPABASE_URL = 'https://vxonbwnzdarqmtpdqehr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kF5AqXwDU4taNpaUfk-O_Q_1zqPOdh7';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 const ROOM_PHOTOS = [
   '/photos/harshada-01.jpg',
@@ -22,146 +35,310 @@ function getMode(){
 }
 
 function App(){
-  const [mode,setMode]=useState(getMode());
-  const [notes,setNotes]=useState([]);
-  const [notesLoading,setNotesLoading]=useState(true);
-  const [assets,setAssets]=useState(()=>JSON.parse(localStorage.getItem('hr_assets')||'[]'));
-  const [showAdd,setShowAdd]=useState(false);
-  const [selected,setSelected]=useState(null);
-  const [celebrate,setCelebrate]=useState(false);
-  const [name,setName]=useState('');
-  const [message,setMessage]=useState('');
-  const [adminUnlocked,setAdminUnlocked]=useState(sessionStorage.getItem('hr_admin')==='1');
-  const [password,setPassword]=useState('');
+
+  const [mode,setMode] = useState(getMode());
+  const [notes,setNotes] = useState([]);
+  const [notesLoading,setNotesLoading] = useState(true);
+
+  const [assets,setAssets] = useState(
+    () => JSON.parse(
+      localStorage.getItem('hr_assets') || '[]'
+    )
+  );
+
+  const [showAdd,setShowAdd] = useState(false);
+  const [selected,setSelected] = useState(null);
+  const [celebrate,setCelebrate] = useState(false);
+
+  const [name,setName] = useState('');
+  const [message,setMessage] = useState('');
+
+  const [adminUnlocked,setAdminUnlocked] = useState(
+    sessionStorage.getItem('hr_admin') === '1'
+  );
+
+  const [password,setPassword] = useState('');
+
 
   useEffect(()=>{
-    localStorage.setItem('hr_assets',JSON.stringify(assets));
+
+    localStorage.setItem(
+      'hr_assets',
+      JSON.stringify(assets)
+    );
+
   },[assets]);
 
+
+  /*
+   * SUPABASE / BACKEND
+   * Kept unchanged.
+   */
   useEffect(()=>{
+
     let mounted = true;
 
     const loadWishes = async () => {
-      const { data, error } = await supabase
-        .from('wishes')
-        .select('id, name, message, created_at')
-        .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Could not load wishes:', error);
-      } else if (mounted) {
+      const {data,error} = await supabase
+        .from('wishes')
+        .select(
+          'id, name, message, created_at'
+        )
+        .order(
+          'created_at',
+          {ascending:false}
+        );
+
+      if(error){
+
+        console.error(
+          'Could not load wishes:',
+          error
+        );
+
+      }else if(mounted){
+
         setNotes(data || []);
+
       }
 
-      if (mounted) setNotesLoading(false);
+      if(mounted){
+
+        setNotesLoading(false);
+
+      }
+
     };
 
     loadWishes();
 
+
     const channel = supabase
       .channel('wishes-room')
+
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'wishes'
+          event:'INSERT',
+          schema:'public',
+          table:'wishes'
         },
         payload => {
+
           setNotes(current => {
-            if (current.some(n => n.id === payload.new.id)) return current;
-            return [payload.new, ...current];
+
+            if(
+              current.some(
+                n => n.id === payload.new.id
+              )
+            ){
+
+              return current;
+
+            }
+
+            return [
+              payload.new,
+              ...current
+            ];
+
           });
+
         }
       )
+
       .on(
         'postgres_changes',
         {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'wishes'
+          event:'DELETE',
+          schema:'public',
+          table:'wishes'
         },
         payload => {
-          setNotes(current => current.filter(n => n.id !== payload.old.id));
+
+          setNotes(
+            current =>
+              current.filter(
+                n => n.id !== payload.old.id
+              )
+          );
+
         }
       )
+
       .subscribe();
 
+
     return () => {
+
       mounted = false;
+
       supabase.removeChannel(channel);
+
     };
+
   },[]);
+
 
   useEffect(()=>{
-    const fn=()=>setMode(getMode());
 
-    addEventListener('popstate',fn);
+    const fn = () => {
+      setMode(getMode());
+    };
 
-    return()=>removeEventListener('popstate',fn);
+    addEventListener(
+      'popstate',
+      fn
+    );
+
+    return () => {
+
+      removeEventListener(
+        'popstate',
+        fn
+      );
+
+    };
+
   },[]);
 
-  const go=m=>{
-    history.pushState({},'',`?mode=${m}`);
+
+  const go = m => {
+
+    history.pushState(
+      {},
+      '',
+      `?mode=${m}`
+    );
+
     setMode(m);
     setSelected(null);
     setCelebrate(false);
+
     window.scrollTo(0,0);
+
   };
 
+
+  /*
+   * SUPABASE / BACKEND
+   * Kept unchanged.
+   */
   const addNote = async e => {
+
     e.preventDefault();
 
     const cleanName = name.trim();
     const cleanMessage = message.trim();
 
-    if(!cleanName || !cleanMessage) return;
+    if(
+      !cleanName ||
+      !cleanMessage
+    ){
 
-    const { data, error } = await supabase
+      return;
+
+    }
+
+
+    const {data,error} = await supabase
       .from('wishes')
       .insert({
-        name: cleanName,
-        message: cleanMessage
+        name:cleanName,
+        message:cleanMessage
       })
       .select()
       .single();
 
+
     if(error){
-      console.error('Could not save wish:', error);
-      alert('Could not save your wish. Please try again.');
+
+      console.error(
+        'Could not save wish:',
+        error
+      );
+
+      alert(
+        'Could not save your wish. Please try again.'
+      );
+
       return;
+
     }
 
+
     setNotes(current => {
-      if(current.some(n => n.id === data.id)) return current;
-      return [data, ...current];
+
+      if(
+        current.some(
+          n => n.id === data.id
+        )
+      ){
+
+        return current;
+
+      }
+
+      return [
+        data,
+        ...current
+      ];
+
     });
+
 
     setName('');
     setMessage('');
     setShowAdd(false);
+
   };
 
+
+  /*
+   * SUPABASE / BACKEND
+   * Kept unchanged.
+   */
   const removeNote = async id => {
-    const { error } = await supabase
+
+    const {error} = await supabase
       .from('wishes')
       .delete()
       .eq('id',id);
 
+
     if(error){
-      console.error('Could not delete wish:', error);
-      alert('Could not delete this wish.');
+
+      console.error(
+        'Could not delete wish:',
+        error
+      );
+
+      alert(
+        'Could not delete this wish.'
+      );
+
     }
+
   };
 
-  const upload=e=>{
-    const f=e.target.files?.[0];
 
-    if(!f)return;
+  const upload = e => {
 
-    const r=new FileReader();
+    const f = e.target.files?.[0];
 
-    r.onload=()=>{
+    if(!f){
+
+      return;
+
+    }
+
+
+    const r = new FileReader();
+
+
+    r.onload = () => {
+
       setAssets([
         {
           id:crypto.randomUUID(),
@@ -170,13 +347,19 @@ function App(){
         },
         ...assets
       ]);
+
     };
 
+
     r.readAsDataURL(f);
+
   };
 
-  if(mode==='admin') {
+
+  if(mode === 'admin'){
+
     return (
+
       <Admin
         notes={notes}
         removeNote={removeNote}
@@ -185,19 +368,36 @@ function App(){
         unlocked={adminUnlocked}
         password={password}
         setPassword={setPassword}
+
         unlock={()=>{
-          if(password==='iluvharshada'){
-            sessionStorage.setItem('hr_admin','1');
+
+          if(
+            password === 'iluvharshada'
+          ){
+
+            sessionStorage.setItem(
+              'hr_admin',
+              '1'
+            );
+
             setAdminUnlocked(true);
+
           }
+
         }}
+
         go={go}
       />
+
     );
+
   }
 
-  if(mode==='harshada') {
+
+  if(mode === 'harshada'){
+
     return (
+
       <Harshada
         notes={notes}
         assets={assets}
@@ -205,14 +405,18 @@ function App(){
         setSelected={setSelected}
         celebrate={celebrate}
         setCelebrate={setCelebrate}
-        go={go}
         notesLoading={notesLoading}
       />
+
     );
+
   }
 
-  if(mode==='wish') {
+
+  if(mode === 'wish'){
+
     return (
+
       <Wishers
         notes={notes}
         notesLoading={notesLoading}
@@ -223,203 +427,940 @@ function App(){
         setName={setName}
         message={message}
         setMessage={setMessage}
-        go={go}
       />
+
     );
+
   }
 
-  return <Home go={go}/>;
+
+  return (
+
+    <Home
+      go={go}
+      notes={notes}
+      notesLoading={notesLoading}
+    />
+
+  );
+
 }
 
-function Shell({children,go}){
+
+/*
+ * SHELL
+ *
+ * Back button is optional.
+ *
+ * Admin -> has back
+ * Wishers -> no back
+ * Harshada -> no back
+ */
+function Shell({
+  children,
+  go,
+  showBack=true
+}){
+
   return (
+
     <main className="page">
+
       <header>
-        <button className="back" onClick={()=>go('home')}>
-          <ArrowLeft size={16}/> back
-        </button>
+
+        {showBack ? (
+
+          <button
+            className="back"
+            onClick={()=>go('home')}
+          >
+
+            <ArrowLeft size={16}/>
+
+            back
+
+          </button>
+
+        ) : (
+
+          <div />
+
+        )}
+
 
         <div className="tiny-title">
-          HARSHADA'S ROOM <span>♡</span>
+
+          HARSHADA'S ROOM
+
+          <span>
+            ♡
+          </span>
+
         </div>
+
       </header>
 
+
       {children}
+
     </main>
+
   );
+
 }
 
-function Home({go}){
+
+/*
+ * HOME
+ */
+function Home({
+  go,
+  notes,
+  notesLoading
+}){
+
   return (
+
     <div className="page home">
 
       <div className="stars">
         ✦　✧　⋆
       </div>
 
+
       <div className="hero-copy">
-        <span>WELCOME TO</span>
-        <h1>Harshada's Room</h1>
-        <p>a tiny pixel room made with a lot of love</p>
+
+        <span>
+          WELCOME TO
+        </span>
+
+        <h1>
+          Harshada's Room
+        </h1>
+
+        <p>
+          a tiny pixel room made with a lot of love
+        </p>
+
       </div>
 
-      <RoomArt/>
+
+      <RoomArt
+        notes={notes}
+        notesLoading={notesLoading}
+      />
+
 
       <div className="home-actions">
-        <button onClick={()=>go('wish')}>
+
+        <button
+          onClick={()=>go('wish')}
+        >
+
           <Plus size={18}/>
+
           leave a little wish
+
         </button>
 
-        <button onClick={()=>go('harshada')}>
+
+        <button
+          onClick={()=>go('harshada')}
+        >
+
           <Heart size={17}/>
+
           Harshada's door
+
         </button>
+
       </div>
 
-      <div className="secret" onClick={()=>go('admin')}>
+
+      <div
+        className="secret"
+        onClick={()=>go('admin')}
+      >
+
         admin corner
+
       </div>
 
     </div>
+
   );
+
 }
 
-function PhotoPolaroid({src,className,label}){
+
+/*
+ * POLAROID
+ */
+function PhotoPolaroid({
+  src,
+  className,
+  label
+}){
+
   return (
-    <div className={`photo-polaroid ${className||''}`}>
-      <img src={src}/>
-      <span>{label}</span>
+
+    <div
+      className={
+        `photo-polaroid ${className || ''}`
+      }
+    >
+
+      <img
+        src={src}
+        alt=""
+      />
+
+      <span>
+        {label}
+      </span>
+
     </div>
+
   );
+
 }
 
-function RoomArt(){
+
+/*
+ * SHARED ROOM VIEW
+ *
+ * Used on:
+ *
+ * 1. Home
+ * 2. Wishers
+ * 3. Harshada
+ *
+ * The notes on the board are REAL
+ * Supabase wishes.
+ */
+function RoomArt({
+  notes=[],
+  notesLoading=false
+}){
+
+  const [balloons,setBalloons] = useState([
+    {
+      id:1,
+      x:'8%',
+      y:'12%',
+      rotate:'-8deg'
+    },
+    {
+      id:2,
+      x:'20%',
+      y:'5%',
+      rotate:'6deg'
+    },
+    {
+      id:3,
+      x:'77%',
+      y:'8%',
+      rotate:'-5deg'
+    },
+    {
+      id:4,
+      x:'87%',
+      y:'19%',
+      rotate:'8deg'
+    },
+    {
+      id:5,
+      x:'91%',
+      y:'42%',
+      rotate:'-6deg'
+    }
+  ]);
+
+
+  const [bursting,setBursting] = useState(null);
+
+
+  const [rabbitFloat,setRabbitFloat] =
+    useState(false);
+
+
+  /*
+   * RABBIT IDLE LOOP
+   */
+  useEffect(()=>{
+
+    const interval = setInterval(()=>{
+
+      setRabbitFloat(
+        current => !current
+      );
+
+    },1200);
+
+
+    return () => {
+
+      clearInterval(interval);
+
+    };
+
+  },[]);
+
+
+  /*
+   * BALLOON POP
+   */
+  const popBalloon = id => {
+
+    if(
+      bursting !== null
+    ){
+
+      return;
+
+    }
+
+
+    setBursting(id);
+
+
+    setTimeout(()=>{
+
+      setBalloons(
+        current =>
+          current.filter(
+            balloon =>
+              balloon.id !== id
+          )
+      );
+
+      setBursting(null);
+
+    },450);
+
+  };
+
+
+  const boardNotes =
+    notes.slice(0,11);
+
+
   return (
-    <div className="room-frame">
-      <div className="room">
 
-        <div className="wall">
+    <>
 
-          <div className="sign">
-            HARSHADA'S<br/>
-            ROOM ♡
-          </div>
+      <style>{`
 
-          <div className="board">
-            <div className="board-title">
-              letters for Harshada
+        /*
+         * ==========================
+         * RABBIT IDLE ANIMATION
+         * ==========================
+         */
+
+        .room-rabbit {
+
+          transition:
+            transform 1.2s ease-in-out,
+            filter 1.2s ease-in-out;
+
+          transform:
+            translateY(
+              ${rabbitFloat ? '-5px' : '0px'}
+            )
+            rotate(
+              ${rabbitFloat ? '1deg' : '-1deg'}
+            );
+
+          filter:
+            drop-shadow(
+              2px 3px 0
+              rgba(50,30,20,.25)
+            );
+
+        }
+
+
+        /*
+         * ==========================
+         * BALLOONS
+         * ==========================
+         */
+
+        .room-balloon {
+
+          position:absolute;
+
+          width:34px;
+          height:42px;
+
+          border-radius:
+            50% 50% 47% 47%;
+
+          border:
+            2px solid #49352e;
+
+          cursor:pointer;
+
+          z-index:8;
+
+          padding:0;
+
+          transition:
+            transform .25s ease,
+            opacity .25s ease;
+
+          animation:
+            balloonFloat
+            3s
+            ease-in-out
+            infinite;
+
+          box-shadow:
+            inset -5px -5px 0
+            rgba(0,0,0,.08);
+
+        }
+
+
+        .room-balloon::before {
+
+          content:'';
+
+          position:absolute;
+
+          width:7px;
+          height:7px;
+
+          left:50%;
+          bottom:-4px;
+
+          transform:
+            translateX(-50%)
+            rotate(45deg);
+
+          background:inherit;
+
+          border-right:
+            2px solid #49352e;
+
+          border-bottom:
+            2px solid #49352e;
+
+        }
+
+
+        .room-balloon::after {
+
+          content:'';
+
+          position:absolute;
+
+          width:1px;
+          height:34px;
+
+          left:50%;
+          top:100%;
+
+          background:#49352e;
+
+          opacity:.75;
+
+        }
+
+
+        .room-balloon:hover {
+
+          transform:
+            scale(1.08)
+            rotate(3deg);
+
+        }
+
+
+        .room-balloon.bursting {
+
+          animation:
+            balloonBurst
+            .45s
+            ease-out
+            forwards;
+
+          pointer-events:none;
+
+        }
+
+
+        @keyframes balloonFloat {
+
+          0%,
+          100% {
+
+            margin-top:0;
+
+          }
+
+          50% {
+
+            margin-top:-7px;
+
+          }
+
+        }
+
+
+        @keyframes balloonBurst {
+
+          0% {
+
+            transform:scale(1);
+
+            opacity:1;
+
+          }
+
+          45% {
+
+            transform:scale(1.35);
+
+            opacity:1;
+
+          }
+
+          100% {
+
+            transform:scale(0);
+
+            opacity:0;
+
+          }
+
+        }
+
+
+        /*
+         * ==========================
+         * BALLOON BURST
+         * ==========================
+         */
+
+        .balloon-burst {
+
+          position:absolute;
+
+          width:42px;
+          height:42px;
+
+          z-index:9;
+
+          pointer-events:none;
+
+          animation:
+            burstFade
+            .45s
+            ease-out
+            forwards;
+
+        }
+
+
+        .balloon-burst span {
+
+          position:absolute;
+
+          left:50%;
+          top:50%;
+
+          font-family:'VT323';
+
+          font-size:16px;
+
+          animation:
+            burstParticle
+            .45s
+            ease-out
+            forwards;
+
+        }
+
+
+        .balloon-burst span:nth-child(1) {
+
+          transform:
+            translate(-50%,-50%)
+            translate(-18px,-15px);
+
+        }
+
+
+        .balloon-burst span:nth-child(2) {
+
+          transform:
+            translate(-50%,-50%)
+            translate(18px,-14px);
+
+        }
+
+
+        .balloon-burst span:nth-child(3) {
+
+          transform:
+            translate(-50%,-50%)
+            translate(-20px,12px);
+
+        }
+
+
+        .balloon-burst span:nth-child(4) {
+
+          transform:
+            translate(-50%,-50%)
+            translate(20px,12px);
+
+        }
+
+
+        @keyframes burstParticle {
+
+          0% {
+
+            opacity:1;
+            scale:1;
+
+          }
+
+          100% {
+
+            opacity:0;
+            scale:.4;
+
+          }
+
+        }
+
+
+        @keyframes burstFade {
+
+          from {
+
+            opacity:1;
+
+          }
+
+          to {
+
+            opacity:0;
+
+          }
+
+        }
+
+      `}</style>
+
+
+      <div className="room-frame">
+
+        <div className="room">
+
+          <div className="wall">
+
+
+            {/* ==========================
+                BALLOONS
+                ========================== */}
+
+            {balloons.map(
+              (balloon,index)=>{
+
+                const balloonColors = [
+
+                  '#f28eae',
+                  '#f4d77d',
+                  '#9fcbd0',
+                  '#d9a3bd',
+                  '#a9c8a7'
+
+                ];
+
+
+                const color =
+                  balloonColors[
+                    index %
+                    balloonColors.length
+                  ];
+
+
+                return (
+
+                  <React.Fragment
+                    key={balloon.id}
+                  >
+
+                    <button
+                      type="button"
+
+                      className={
+                        'room-balloon ' +
+                        (
+                          bursting === balloon.id
+                            ? 'bursting'
+                            : ''
+                        )
+                      }
+
+                      onClick={() =>
+                        popBalloon(
+                          balloon.id
+                        )
+                      }
+
+                      aria-label="Pop balloon"
+
+                      style={{
+                        left:balloon.x,
+                        top:balloon.y,
+                        background:color,
+                        transform:
+                          `rotate(${balloon.rotate})`
+                      }}
+
+                    />
+
+
+                    {bursting === balloon.id && (
+
+                      <div
+                        className="balloon-burst"
+
+                        style={{
+                          left:balloon.x,
+                          top:balloon.y
+                        }}
+
+                      >
+
+                        <span>
+                          ✦
+                        </span>
+
+                        <span>
+                          ♡
+                        </span>
+
+                        <span>
+                          ✧
+                        </span>
+
+                        <span>
+                          •
+                        </span>
+
+                      </div>
+
+                    )}
+
+                  </React.Fragment>
+
+                );
+
+              }
+            )}
+
+
+            {/* ==========================
+                SIGN
+                ========================== */}
+
+            <div className="sign">
+
+              HARSHADA'S<br/>
+
+              ROOM ♡
+
             </div>
 
-            {[
-              '♡',
-              'HBD!',
-              'love u',
-              'yay!',
-              'xoxo',
-              '✨',
-              'babe',
-              'hehe',
-              '💗',
-              '!!!',
-              'you'
-            ].map((x,i)=>(
-              <span
-                key={i}
-                className={'mini-note n'+i}
-              >
-                {x}
-              </span>
-            ))}
-          </div>
 
-          <div className="photo-cluster">
+            {/* ==========================
+                REAL WISH BOARD
+                ========================== */}
 
-            <PhotoPolaroid
-              src={ROOM_PHOTOS[0]}
-              className="ph1"
-              label="you ♡"
-            />
+            <div className="board">
 
-            <PhotoPolaroid
-              src={ROOM_PHOTOS[4]}
-              className="ph2"
-              label="us"
-            />
+              <div className="board-title">
 
-            <PhotoPolaroid
-              src={ROOM_PHOTOS[2]}
-              className="ph3"
-              label="♡"
-            />
+                letters for Harshada
 
-          </div>
+              </div>
 
-          <div className="shelf">
 
-            <div className="bus-wrap">
-              <MiniBus/>
+              {notesLoading ? (
+
+                <span
+                  className="mini-note n0"
+                >
+
+                  loading…
+
+                </span>
+
+              ) : boardNotes.length === 0 ? (
+
+                <span
+                  className="mini-note n0"
+                >
+
+                  no wishes yet ♡
+
+                </span>
+
+              ) : (
+
+                boardNotes.map(
+                  (note,index)=>{
+
+                    const text =
+                      note.message.length > 18
+                        ? note.message.slice(0,18) + '…'
+                        : note.message;
+
+
+                    return (
+
+                      <span
+                        key={note.id}
+
+                        className={
+                          'mini-note n' +
+                          index
+                        }
+
+                        title={
+                          `${note.name}: ${note.message}`
+                        }
+                      >
+
+                        {text}
+
+                      </span>
+
+                    );
+
+                  }
+                )
+
+              )}
+
             </div>
 
-            <div className="tiny-frame">
-              H<br/>
-              <span>♡</span>
+
+            {/* ==========================
+                PHOTOS
+                ========================== */}
+
+            <div className="photo-cluster">
+
+              <PhotoPolaroid
+                src={ROOM_PHOTOS[0]}
+                className="ph1"
+                label="you ♡"
+              />
+
+              <PhotoPolaroid
+                src={ROOM_PHOTOS[4]}
+                className="ph2"
+                label="us"
+              />
+
+              <PhotoPolaroid
+                src={ROOM_PHOTOS[2]}
+                className="ph3"
+                label="♡"
+              />
+
+            </div>
+
+
+            {/* ==========================
+                SHELF
+                ========================== */}
+
+            <div className="shelf">
+
+              <div className="tiny-frame">
+
+                H
+
+                <br/>
+
+                <span>
+                  ♡
+                </span>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+
+          {/* ==========================
+              FLOOR
+              ========================== */}
+
+          <div className="floor">
+
+            <div className="table"></div>
+
+            <div className="chair c1"/>
+
+            <div className="chair c2"/>
+
+            <div className="plant">
+
+              ♧
+
+            </div>
+
+
+            {/* WHITE RABBIT */}
+
+            <div
+              className="cat room-rabbit"
+
+              aria-label="little white rabbit"
+            >
+
+              🐇
+
             </div>
 
           </div>
+
 
         </div>
 
-        <div className="floor">
-
-          <div className="table"></div>
-
-          <div className="chair c1"/>
-          <div className="chair c2"/>
-
-          <div className="plant">
-            ♧
-          </div>
-
-          <div className="cat">
-            🐇
-          </div>
-
-        </div>
-
       </div>
-    </div>
+
+    </>
+
   );
+
 }
 
-function MiniBus(){
-  return (
-    <div className="mini-bus" title="tiny India bus">
 
-      <div className="bus-roof">
-        INDIA
-      </div>
-
-      <div className="bus-body">
-
-        <span className="bus-window w1"/>
-        <span className="bus-window w2"/>
-        <span className="bus-window w3"/>
-        <span className="bus-window w4"/>
-
-        <i className="bus-wheel bw1"/>
-        <i className="bus-wheel bw2"/>
-
-      </div>
-
-      <div className="bus-front">
-        ▸
-      </div>
-
-    </div>
-  );
-}
-
+/*
+ * WISHERS PAGE
+ *
+ * Structure:
+ *
+ * Content
+ * ↓
+ * Number of notes
+ * ↓
+ * Room view
+ * ↓
+ * Listing of notes
+ */
 function Wishers({
   notes,
   notesLoading,
@@ -429,60 +1370,115 @@ function Wishers({
   name,
   setName,
   message,
-  setMessage,
-  go
+  setMessage
 }){
-  const people=[
-    ...new Map(notes.map(n=>[n.name,n])).values()
+
+  const people = [
+
+    ...new Map(
+      notes.map(
+        n => [n.name,n]
+      )
+    ).values()
+
   ];
 
+
   return (
-    <Shell go={go}>
+
+    <Shell
+      showBack={false}
+    >
 
       <section className="section">
 
         <p className="eyebrow">
+
           YOU'RE IN THE ROOM
+
         </p>
+
 
         <h2>
+
           Leave Harshada<br/>
-          <em>a little note.</em>
+
+          <em>
+            a little note.
+          </em>
+
         </h2>
 
+
         <p className="lead">
+
           No account. No login. Just your name +
           something you want her to know.
+
         </p>
+
 
         <button
           className="primary"
-          onClick={()=>setShowAdd(true)}
+          onClick={
+            ()=>setShowAdd(true)
+          }
         >
+
           <Plus/>
+
           Add my note
+
         </button>
+
 
         <div className="wished">
 
           <div>
-            <b>{people.length}</b>
-            <span>people have wished her</span>
+
+            <b>
+              {people.length}
+            </b>
+
+            <span>
+              people have wished her
+            </span>
+
           </div>
 
+
           <button
-            onClick={()=>
+            onClick={()=>{
+
               document
-                .getElementById('wisher-list')
-                .scrollIntoView({behavior:'smooth'})
-            }
+                .getElementById(
+                  'wisher-list'
+                )
+                ?.scrollIntoView({
+                  behavior:'smooth'
+                });
+
+            }}
           >
+
             see who wished →
+
           </button>
 
         </div>
 
       </section>
+
+
+      {/* ROOM VIEW */}
+
+      <RoomArt
+        notes={notes}
+        notesLoading={notesLoading}
+      />
+
+
+      {/* NOTE LIST */}
 
       <div
         id="wisher-list"
@@ -490,87 +1486,153 @@ function Wishers({
       >
 
         <h3>
+
           Already on the board
+
         </h3>
 
+
         {
+
           notesLoading
+
           ?
-          <p>Loading wishes…</p>
+
+          <p>
+
+            Loading wishes…
+
+          </p>
+
           :
-          notes.length===0
+
+          notes.length === 0
+
           ?
-          <p>No wishes yet — be the first ♡</p>
+
+          <p>
+
+            No wishes yet — be the first ♡
+
+          </p>
+
           :
-          notes.map(n=>(
-            <div
-              className="note-card"
-              key={n.id}
-            >
-              <span className="tape"/>
 
-              <b>{n.name}</b>
+          notes.map(
+            n => (
 
-              <p>
-                {n.message}
-              </p>
+              <div
+                className="note-card"
+                key={n.id}
+              >
 
-            </div>
-          ))
+                <span className="tape"/>
+
+
+                <b>
+
+                  {n.name}
+
+                </b>
+
+
+                <p>
+
+                  {n.message}
+
+                </p>
+
+              </div>
+
+            )
+          )
+
         }
 
       </div>
 
+
       {
-        showAdd &&
-        <Modal
-          title="Add your note"
-          close={()=>setShowAdd(false)}
-        >
+        showAdd && (
 
-          <form onSubmit={addNote}>
+          <Modal
+            title="Add your note"
+            close={
+              ()=>setShowAdd(false)
+            }
+          >
 
-            <label>
-              Your name
-
-              <input
-                value={name}
-                onChange={e=>setName(e.target.value)}
-                placeholder="e.g. Ananya"
-                maxLength={80}
-                autoFocus
-              />
-
-            </label>
-
-            <label>
-              Your wish
-
-              <textarea
-                value={message}
-                onChange={e=>setMessage(e.target.value)}
-                placeholder="Write something lovely…"
-                maxLength={1000}
-              />
-
-            </label>
-
-            <button
-              className="primary"
-              type="submit"
+            <form
+              onSubmit={addNote}
             >
-              Pin it to the board ♡
-            </button>
 
-          </form>
+              <label>
 
-        </Modal>
+                Your name
+
+                <input
+                  value={name}
+                  onChange={
+                    e => setName(
+                      e.target.value
+                    )
+                  }
+                  placeholder="e.g. Ananya"
+                  maxLength={80}
+                  autoFocus
+                />
+
+              </label>
+
+
+              <label>
+
+                Your wish
+
+                <textarea
+                  value={message}
+                  onChange={
+                    e => setMessage(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Write something lovely…"
+                  maxLength={1000}
+                />
+
+              </label>
+
+
+              <button
+                className="primary"
+                type="submit"
+              >
+
+                Pin it to the board ♡
+
+              </button>
+
+            </form>
+
+          </Modal>
+
+        )
       }
 
     </Shell>
+
   );
+
 }
 
+
+/*
+ * HARSHADA PAGE
+ *
+ * No back button.
+ *
+ * Shared room view added.
+ */
 function Harshada({
   notes,
   assets,
@@ -578,129 +1640,240 @@ function Harshada({
   setSelected,
   celebrate,
   setCelebrate,
-  go,
   notesLoading
 }){
 
-  const photos=assets.length
-    ? assets.map(a=>a.url)
-    : ROOM_PHOTOS;
+  const photos =
+    assets.length
+      ? assets.map(
+          a => a.url
+        )
+      : ROOM_PHOTOS;
+
 
   return (
-    <Shell go={go}>
 
-      <section className="section harshada">
+    <Shell
+      showBack={false}
+    >
+
+      <section
+        className="section harshada"
+      >
 
         <p className="eyebrow">
+
           A ROOM MADE FOR YOU
+
         </p>
+
 
         <h2>
+
           Happy birthday,<br/>
-          <em>babe.</em>
+
+          <em>
+            babe.
+          </em>
+
         </h2>
 
+
         <p className="lead">
+
           There are little pieces of love hidden
           around this room. Tap a note to read it.
+
         </p>
+
 
         <button
           className="primary"
-          onClick={()=>setCelebrate(true)}
+          onClick={
+            ()=>setCelebrate(true)
+          }
         >
+
           <Sparkles/>
+
           Open all the wishes
+
         </button>
 
       </section>
+
+
+      {/* SHARED ROOM VIEW */}
+
+      <RoomArt
+        notes={notes}
+        notesLoading={notesLoading}
+      />
+
+
+      {/* INTERACTIVE WISH ROOM */}
 
       <div className="interactive-room">
 
         <div className="wall">
 
+
           <div className="big-sign">
-            HARSHADA<br/>
-            <span>♡</span>
+
+            HARSHADA
+
+            <br/>
+
+            <span>
+              ♡
+            </span>
+
           </div>
+
 
           <div className="gallery-strip">
-            {photos.slice(0,4).map((src,i)=>(
-              <img
-                src={src}
-                key={i}
-              />
-            ))}
+
+            {photos
+              .slice(0,4)
+              .map(
+                (src,i)=>(
+                  <img
+                    src={src}
+                    key={i}
+                    alt=""
+                  />
+                )
+              )
+            }
+
           </div>
 
-          <div className="bus-display">
-            <MiniBus/>
-
-            <small>
-              tiny journey<br/>
-              for you
-            </small>
-          </div>
 
           {
-            notesLoading
-            ?
-            <p className="sticky s0">
-              Loading wishes…
-            </p>
-            :
-            notes.map((n,i)=>(
-              <button
-                className={'sticky s'+(i%10)}
-                key={n.id}
-                onClick={()=>setSelected(n)}
-              >
-                {n.message.slice(0,38)}
-                {n.message.length>38?'…':''}
 
-                <small>
-                  — {n.name}
-                </small>
-              </button>
-            ))
+            notesLoading
+
+            ?
+
+            <p className="sticky s0">
+
+              Loading wishes…
+
+            </p>
+
+            :
+
+            notes.map(
+              (n,i)=>(
+                <button
+                  className={
+                    'sticky s' +
+                    (i % 10)
+                  }
+
+                  key={n.id}
+
+                  onClick={
+                    ()=>setSelected(n)
+                  }
+                >
+
+                  {
+                    n.message.slice(
+                      0,
+                      38
+                    )
+                  }
+
+                  {
+                    n.message.length > 38
+                      ? '…'
+                      : ''
+                  }
+
+
+                  <small>
+
+                    — {n.name}
+
+                  </small>
+
+                </button>
+              )
+            )
+
           }
 
         </div>
 
+
         <div className="floor">
+
           <span className="floor-cat">
+
             🐇
+
           </span>
+
         </div>
 
       </div>
 
-      {
-        selected &&
-        <Modal
-          title={`From ${selected.name} ♡`}
-          close={()=>setSelected(null)}
-        >
-          <div className="read-note">
-            {selected.message}
-          </div>
-        </Modal>
-      }
 
       {
-        celebrate &&
-        <Celebration
-          close={()=>setCelebrate(false)}
-          count={notes.length}
-        />
+        selected && (
+
+          <Modal
+            title={
+              `From ${selected.name} ♡`
+            }
+            close={
+              ()=>setSelected(null)
+            }
+          >
+
+            <div className="read-note">
+
+              {selected.message}
+
+            </div>
+
+          </Modal>
+
+        )
+      }
+
+
+      {
+        celebrate && (
+
+          <Celebration
+            close={
+              ()=>setCelebrate(false)
+            }
+            count={notes.length}
+          />
+
+        )
       }
 
     </Shell>
+
   );
+
 }
 
-function Celebration({close,count}){
+
+/*
+ * CELEBRATION
+ */
+function Celebration({
+  close,
+  count
+}){
+
   return (
+
     <div className="celebrate">
 
       <div className="confetti">
@@ -711,51 +1884,87 @@ function Celebration({close,count}){
             <i
               key={i}
               style={{
-                left:`${(i*37)%100}%`,
-                animationDelay:`${(i%16)*.08}s`,
-                fontSize:`${12+(i%4)*5}px`
+                left:
+                  `${(i * 37) % 100}%`,
+
+                animationDelay:
+                  `${(i % 16) * .08}s`,
+
+                fontSize:
+                  `${12 + (i % 4) * 5}px`
               }}
             >
-              {['✦','♡','✧','•'][i%4]}
+
+              {
+                ['✦','♡','✧','•'][
+                  i % 4
+                ]
+              }
+
             </i>
           )
         )}
 
       </div>
 
+
       <div className="celebrate-card">
 
         <div className="cake-big">
+
           🎂
+
         </div>
 
+
         <p>
+
           for the birthday girl
+
         </p>
 
+
         <h2>
+
           HAPPY<br/>
+
           BIRTHDAY<br/>
-          <em>BABE ♡</em>
+
+          <em>
+            BABE ♡
+          </em>
+
         </h2>
 
+
         <span>
+
           {count} little wishes are waiting for you
+
         </span>
+
 
         <button
           className="primary"
           onClick={close}
         >
+
           Let me read them →
+
         </button>
 
       </div>
 
     </div>
+
   );
+
 }
 
+
+/*
+ * ADMIN
+ */
 function Admin({
   notes,
   removeNote,
@@ -769,68 +1978,112 @@ function Admin({
 }){
 
   if(!unlocked){
+
     return (
+
       <div className="admin-login">
 
         <Lock size={28}/>
 
+
         <p>
+
           Harshada's Room · Admin
+
         </p>
 
+
         <h2>
+
           Enter the secret key
+
         </h2>
+
 
         <input
           type="password"
           value={password}
-          onChange={e=>setPassword(e.target.value)}
+          onChange={
+            e => setPassword(
+              e.target.value
+            )
+          }
           placeholder="password"
-          onKeyDown={e=>e.key==='Enter'&&unlock()}
+
+          onKeyDown={
+            e =>
+              e.key === 'Enter' &&
+              unlock()
+          }
         />
+
 
         <button
           className="primary"
           onClick={unlock}
         >
+
           Unlock
+
         </button>
+
 
         <button
           className="plain"
-          onClick={()=>go('home')}
+          onClick={
+            ()=>go('home')
+          }
         >
+
           ← back to room
+
         </button>
 
       </div>
+
     );
+
   }
 
+
   return (
-    <Shell go={go}>
+
+    <Shell
+      go={go}
+      showBack={true}
+    >
 
       <div className="admin">
+
 
         <div>
 
           <p className="eyebrow">
+
             PRIVATE CONTROL ROOM
+
           </p>
 
+
           <h2>
+
             Harshada's Room<br/>
-            <em>Admin</em>
+
+            <em>
+              Admin
+            </em>
+
           </h2>
 
         </div>
+
 
         <label className="upload">
 
           <Upload size={18}/>
 
           Add room photo
+
 
           <input
             type="file"
@@ -839,6 +2092,7 @@ function Admin({
           />
 
         </label>
+
 
         <p className="admin-tip">
 
@@ -850,71 +2104,117 @@ function Admin({
 
         </p>
 
+
         <div className="admin-grid">
+
 
           <div>
 
             <h3>
+
               Wishes · {notes.length}
+
             </h3>
 
-            {notes.map(n=>(
-              <div
-                className="admin-note"
-                key={n.id}
-              >
 
-                <div>
+            {notes.map(
+              n => (
 
-                  <b>{n.name}</b>
+                <div
+                  className="admin-note"
+                  key={n.id}
+                >
 
-                  <p>
-                    {n.message}
-                  </p>
+                  <div>
+
+                    <b>
+
+                      {n.name}
+
+                    </b>
+
+
+                    <p>
+
+                      {n.message}
+
+                    </p>
+
+                  </div>
+
+
+                  <button
+                    onClick={
+                      ()=>removeNote(n.id)
+                    }
+
+                    aria-label={
+                      `Delete ${n.name}'s note`
+                    }
+                  >
+
+                    <Trash2 size={16}/>
+
+                  </button>
 
                 </div>
 
-                <button
-                  onClick={()=>removeNote(n.id)}
-                  aria-label={`Delete ${n.name}'s note`}
-                >
-                  <Trash2 size={16}/>
-                </button>
-
-              </div>
-            ))}
+              )
+            )}
 
           </div>
+
 
           <div>
 
             <h3>
+
               Uploaded memories · {assets.length}
+
             </h3>
+
 
             <div className="asset-grid">
 
-              {assets.map(a=>(
-                <img
-                  src={a.url}
-                  key={a.id}
-                />
-              ))}
+              {assets.map(
+                a => (
+
+                  <img
+                    src={a.url}
+                    key={a.id}
+                    alt=""
+                  />
+
+                )
+              )}
 
             </div>
 
           </div>
+
 
         </div>
 
       </div>
 
     </Shell>
+
   );
+
 }
 
-function Modal({title,close,children}){
+
+/*
+ * MODAL
+ */
+function Modal({
+  title,
+  close,
+  children
+}){
+
   return (
+
     <div
       className="modal-back"
       onClick={close}
@@ -922,31 +2222,46 @@ function Modal({title,close,children}){
 
       <div
         className="modal"
-        onClick={e=>e.stopPropagation()}
+        onClick={
+          e => e.stopPropagation()
+        }
       >
+
 
         <button
           className="close"
           onClick={close}
         >
+
           <X/>
+
         </button>
 
+
         <p className="eyebrow">
+
           A LITTLE NOTE
+
         </p>
 
+
         <h3>
+
           {title}
+
         </h3>
+
 
         {children}
 
       </div>
 
     </div>
+
   );
+
 }
+
 
 createRoot(
   document.getElementById('root')
